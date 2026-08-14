@@ -41,7 +41,7 @@ feeds/APIs -> raw cache (files, canonical) -> deterministic filters -> SimHash c
                                                    |__ fail twice -> quarantine + run report
 ```
 
-Docs: ARCHITECTURE.md, DECISIONS.md, ROADMAP.md, CHALLENGES.md, EVALUATION.md, MODEL-GOVERNANCE.md, SOURCES.md (see repo root).
+Docs: ARCHITECTURE.md, ROADMAP.md, CHALLENGES.md, EVALUATION.md, MODEL-GOVERNANCE.md, SOURCES.md (see repo root).
 
 ## Tests
 
