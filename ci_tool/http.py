@@ -27,17 +27,18 @@ def get_text(url: str, *, params: dict | None = None) -> str:
                 url, params=params, timeout=TIMEOUT,
                 headers={"User-Agent": UA}, follow_redirects=True,
             )
+        except httpx.HTTPError as e:
+            last_error = e
+        else:
             if resp.status_code < 400:
                 return resp.text
+            # raise_for_status leaves the loop: a non-retryable status will not
+            # fix itself on attempt two
             if resp.status_code not in RETRYABLE:
                 resp.raise_for_status()
             last_error = httpx.HTTPStatusError(
                 f"HTTP {resp.status_code} for {url}", request=resp.request, response=resp
             )
-        except httpx.HTTPStatusError:
-            raise
-        except httpx.HTTPError as e:
-            last_error = e
         if attempt < MAX_ATTEMPTS:
             time.sleep(_retry_delay(resp, attempt))
     raise last_error if last_error else RuntimeError(f"fetch failed: {url}")

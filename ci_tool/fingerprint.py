@@ -7,7 +7,6 @@ itself.
 """
 
 import hashlib
-import html
 import re
 
 # Texts shorter than this (after normalization) carry too little signal to
@@ -21,7 +20,6 @@ CROSSLIST_THRESHOLD = 0.92
 _TAG_RE = re.compile(r"<[^>]*>")
 _ENTITY_RE = re.compile(r"&[a-z#0-9]+;", re.IGNORECASE)
 _URL_RE = re.compile(r"https?://\S+")
-_MULTISPACE_RE = re.compile(r" {2,}")
 _FINGERPRINT_RE = re.compile(r"^[0-9a-f]{16}$")
 
 
@@ -31,8 +29,7 @@ def normalize_text(text: str) -> str:
     normalized = _ENTITY_RE.sub(" ", normalized)
     normalized = _URL_RE.sub(" ", normalized)
     normalized = "".join(ch if ch.isalnum() else " " for ch in normalized)
-    normalized = _MULTISPACE_RE.sub(" ", normalized)
-    return normalized.strip()
+    return " ".join(normalized.split())
 
 
 def fingerprint(text: str) -> str:
@@ -48,15 +45,11 @@ def fingerprint(text: str) -> str:
         return ""
     weights = [0] * 64
     for i in range(len(tokens) - 2):
-        shingle = f"{tokens[i]} {tokens[i + 1]} {tokens[i + 2]}"
-        digest = hashlib.sha1(shingle.encode("utf-8")).digest()[:8]
+        shingle = " ".join(tokens[i:i + 3])
+        digest = int.from_bytes(hashlib.sha1(shingle.encode()).digest()[:8], "big")
         for bit in range(64):
-            byte = digest[bit >> 3]
-            weights[bit] += 1 if (byte >> (7 - (bit & 7))) & 1 else -1
-    hash_value = 0
-    for bit in range(64):
-        if weights[bit] > 0:
-            hash_value |= 1 << (63 - bit)
+            weights[bit] += 1 if (digest >> bit) & 1 else -1
+    hash_value = sum(1 << bit for bit, weight in enumerate(weights) if weight > 0)
     return f"{hash_value:016x}"
 
 

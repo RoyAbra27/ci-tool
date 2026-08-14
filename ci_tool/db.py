@@ -67,11 +67,11 @@ def seen_keys(conn: sqlite3.Connection) -> tuple[set[str], set[str]]:
     return ids, urls
 
 
-def recent_fingerprints(conn: sqlite3.Connection, since_iso: str) -> list[tuple[str, str, str]]:
+def recent_fingerprints(conn: sqlite3.Connection, since_iso: str) -> list[tuple[str, str]]:
     return [
-        (row["id"], row["fingerprint"], row["cluster_id"])
+        (row["fingerprint"], row["cluster_id"])
         for row in conn.execute(
-            "SELECT id, fingerprint, cluster_id FROM items"
+            "SELECT fingerprint, cluster_id FROM items"
             " WHERE fingerprint != '' AND fetched_at >= ?",
             (since_iso,),
         )
@@ -92,19 +92,20 @@ def add_event(conn: sqlite3.Connection, item_id: str, event: str, detail: str = 
 def insert_item(
     conn: sqlite3.Connection, item: RawItem, fingerprint: str, cluster_id: str, run_id: str
 ) -> None:
+    item_id = item.content_hash()
     conn.execute(
         "INSERT OR IGNORE INTO items"
         "(id, source_id, trust_tier, competitor, url, title, text,"
         " published_at, fetched_at, fingerprint, cluster_id, raw_ref, run_id)"
         " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
         (
-            item.content_hash(), item.source_id, item.trust_tier, item.competitor,
+            item_id, item.source_id, item.trust_tier, item.competitor,
             item.url, item.title, item.text,
             item.published_at.isoformat() if item.published_at else None,
             item.fetched_at.isoformat(), fingerprint, cluster_id, item.raw_ref, run_id,
         ),
     )
-    add_event(conn, item.content_hash(), "ingested", f"run={run_id} source={item.source_id}")
+    add_event(conn, item_id, "ingested", f"run={run_id} source={item.source_id}")
 
 
 def add_run(conn: sqlite3.Connection, run_id: str, mode: str, counters: dict) -> None:

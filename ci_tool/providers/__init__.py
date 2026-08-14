@@ -1,14 +1,17 @@
-"""Provider registry: dispatches fetch() to ci_tool.providers.<name> by source.provider."""
-
-import importlib
+"""Provider registry: maps source.provider to its fetch function."""
 
 from ci_tool.cache import Fetcher
 from ci_tool.models import RawItem, SourceConfig
+from ci_tool.providers import github_releases, newsdata, rss
+
+PROVIDERS = {
+    "rss": rss.fetch,
+    "github_releases": github_releases.fetch,
+    "newsdata": newsdata.fetch,
+}
 
 
 def fetch(source: SourceConfig, fetcher: Fetcher) -> list[RawItem]:
-    try:
-        module = importlib.import_module(f".{source.provider}", __package__)
-    except ImportError:
+    if source.provider not in PROVIDERS:
         raise ValueError(f"unknown provider: {source.provider!r}")
-    return module.fetch(source, fetcher)
+    return PROVIDERS[source.provider](source, fetcher)

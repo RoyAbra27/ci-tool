@@ -1,4 +1,4 @@
-"""RSS/Atom provider. Also supplies the entry-parsing helper github_releases reuses."""
+"""RSS/Atom provider. Also supplies the feed-parsing helper github_releases reuses."""
 
 import time
 from datetime import datetime, timezone
@@ -37,8 +37,7 @@ def _to_datetime(struct_time: time.struct_time | None) -> datetime | None:
     return datetime(*struct_time[:6], tzinfo=timezone.utc)
 
 
-def parse_entry(entry, source: SourceConfig, raw_ref: str, fetched_at: datetime) -> RawItem | None:
-    """Build a RawItem from one feedparser entry, or None if url/title is missing."""
+def _parse_entry(entry, source: SourceConfig, raw_ref: str, fetched_at: datetime) -> RawItem | None:
     url = entry.get("link")
     title = entry.get("title")
     if not url or not title:
@@ -57,11 +56,18 @@ def parse_entry(entry, source: SourceConfig, raw_ref: str, fetched_at: datetime)
     )
 
 
+def parse_feed(body: str, source: SourceConfig, raw_ref: str) -> list[RawItem]:
+    """Entries of one RSS/Atom body, skipping any without a url and title."""
+    fetched_at = datetime.now(timezone.utc)
+    items = (
+        _parse_entry(entry, source, raw_ref, fetched_at)
+        for entry in feedparser.parse(body).entries
+    )
+    return [item for item in items if item is not None]
+
+
 def fetch(source: SourceConfig, fetcher: Fetcher) -> list[RawItem]:
     if source.url is None:
         raise ValueError(f"rss source {source.id!r} has no url")
     body, raw_ref = fetcher.get_text(source.id, source.url)
-    parsed = feedparser.parse(body)
-    fetched_at = datetime.now(timezone.utc)
-    items = (parse_entry(entry, source, raw_ref, fetched_at) for entry in parsed.entries)
-    return [item for item in items if item is not None]
+    return parse_feed(body, source, raw_ref)

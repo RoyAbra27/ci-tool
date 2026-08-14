@@ -38,7 +38,7 @@ def compile_keyword(kw: str):
 def build_matcher(aliases: list[str]):
     # empty strings are dropped: '' is a substring of everything and would
     # silently bypass the relevance gate
-    matchers = [compile_keyword(a) for a in aliases if isinstance(a, str) and a.strip()]
+    matchers = [compile_keyword(a) for a in aliases if a.strip()]
 
     def match(text: str) -> bool:
         lowered = text.lower()

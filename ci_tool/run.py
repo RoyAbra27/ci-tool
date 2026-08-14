@@ -48,13 +48,13 @@ def run(*, live: bool, config_path: str = "config.toml") -> dict:
                 fp = fingerprint.fingerprint(f"{item.title} {item.text}")
                 cluster_id = item.content_hash()
                 if fp:
-                    for _, other_fp, other_cluster in known:
+                    for other_fp, other_cluster in known:
                         if fingerprint.similarity(fp, other_fp) >= fingerprint.CROSSLIST_THRESHOLD:
                             cluster_id = other_cluster
                             clustered += 1
                             break
                 db.insert_item(conn, item, fp, cluster_id, run_id)
-                known.append((item.content_hash(), fp, cluster_id))
+                known.append((fp, cluster_id))
 
             counters["clustered"] = clustered
             counters["sources_ok"] = sum(1 for v in source_status.values() if v.startswith("ok"))
