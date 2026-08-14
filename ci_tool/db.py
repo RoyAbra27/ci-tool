@@ -35,11 +35,28 @@ CREATE TABLE IF NOT EXISTS events(
 );
 CREATE TABLE IF NOT EXISTS quarantine(
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  item_id TEXT NOT NULL,
+  ref_id TEXT NOT NULL,
   stage TEXT NOT NULL,
   error TEXT NOT NULL,
   payload TEXT NOT NULL DEFAULT '',
   ts TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS insights(
+  cluster_id TEXT PRIMARY KEY,
+  run_id TEXT NOT NULL,
+  provider TEXT NOT NULL,
+  model TEXT NOT NULL,
+  prompt_version TEXT NOT NULL,
+  summary TEXT NOT NULL,
+  category TEXT NOT NULL,
+  themes TEXT NOT NULL,
+  entities TEXT NOT NULL,
+  numbers TEXT NOT NULL,
+  quote TEXT NOT NULL,
+  confidence TEXT NOT NULL,
+  competitor TEXT,
+  item_count INTEGER NOT NULL,
+  created_at TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS runs(
   run_id TEXT PRIMARY KEY,
@@ -106,6 +123,39 @@ def insert_item(
         ),
     )
     add_event(conn, item_id, "ingested", f"run={run_id} source={item.source_id}")
+
+
+def unanalyzed_clusters(conn: sqlite3.Connection) -> dict[str, list[sqlite3.Row]]:
+    """Clusters with no insight yet; quarantined clusters stay out until a
+    human looks at them (they are visible in the run report, not retried)."""
+    clusters: dict[str, list[sqlite3.Row]] = {}
+    for row in conn.execute(
+        "SELECT * FROM items"
+        " WHERE cluster_id NOT IN (SELECT cluster_id FROM insights)"
+        "   AND cluster_id NOT IN (SELECT ref_id FROM quarantine WHERE stage = 'extract')"
+        " ORDER BY published_at"
+    ):
+        clusters.setdefault(row["cluster_id"], []).append(row)
+    return clusters
+
+
+def quarantine_add(conn: sqlite3.Connection, ref_id: str, stage: str, error: str, payload: str) -> None:
+    conn.execute(
+        "INSERT INTO quarantine(ref_id, stage, error, payload, ts) VALUES(?,?,?,?,?)",
+        (ref_id, stage, error, payload, _now()),
+    )
+
+
+def add_insight(conn: sqlite3.Connection, **f) -> None:
+    conn.execute(
+        "INSERT OR REPLACE INTO insights"
+        "(cluster_id, run_id, provider, model, prompt_version, summary, category,"
+        " themes, entities, numbers, quote, confidence, competitor, item_count, created_at)"
+        " VALUES(:cluster_id, :run_id, :provider, :model, :prompt_version, :summary,"
+        " :category, :themes, :entities, :numbers, :quote, :confidence, :competitor,"
+        " :item_count, :created_at)",
+        {**f, "created_at": _now()},
+    )
 
 
 def add_run(conn: sqlite3.Connection, run_id: str, mode: str, counters: dict) -> None:

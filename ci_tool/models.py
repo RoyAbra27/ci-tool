@@ -6,8 +6,9 @@ import re
 import tomllib
 from datetime import datetime
 from pathlib import Path
+from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 def _norm(s: str) -> str:
@@ -38,10 +39,21 @@ class Settings(BaseModel):
     db_path: str = "data/ci.db"
 
 
+class LLMConfig(BaseModel):
+    provider: Literal["groq", "gemini"] = "groq"
+    # pinned model IDs, never "latest" (governance: MODEL-GOVERNANCE.md)
+    groq_model: str = "openai/gpt-oss-120b"
+    gemini_model: str = "gemini-2.5-flash"
+
+    def model_for(self, provider: str) -> str:
+        return {"groq": self.groq_model, "gemini": self.gemini_model}[provider]
+
+
 class AppConfig(BaseModel):
     settings: Settings
     competitors: list[CompetitorConfig]
     sources: list[SourceConfig]
+    llm: LLMConfig = LLMConfig()
 
     def aliases(self) -> list[str]:
         return [a for c in self.competitors for a in c.aliases]
@@ -68,3 +80,29 @@ class RawItem(BaseModel):
     def content_hash(self) -> str:
         """Identity is content, not URL: the same story at two URLs is one item."""
         return hashlib.sha256(f"{_norm(self.title)}\n{_norm(self.text)}".encode()).hexdigest()
+
+
+# Fixed, code-defined taxonomy. The model selects from these; it never invents
+# categories or themes (determinism principle, DECISIONS D7).
+Category = Literal[
+    "product_release", "security_research", "funding", "acquisition",
+    "partnership", "pricing", "leadership", "marketing_content", "other",
+]
+Theme = Literal[
+    "agentic_supply_chain", "fly", "apptrust", "agentic_remediation",
+    "ai_catalog", "mlops_models", "github_partnership",
+]
+
+
+class InsightExtraction(BaseModel):
+    """The LLM's entire output surface. Anything outside this schema is a
+    validation error, and validation errors fail closed to quarantine."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    summary: str = Field(min_length=1, max_length=600)
+    category: Category
+    themes: list[Theme] = Field(default_factory=list)
+    entities: list[str] = Field(default_factory=list)
+    numbers: list[str] = Field(default_factory=list)
+    quote: str = Field(min_length=1)
