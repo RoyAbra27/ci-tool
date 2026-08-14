@@ -2,7 +2,7 @@
 each. The LLM never decides what enters the pipeline; these functions do."""
 
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from ci_tool.models import RawItem
@@ -48,7 +48,7 @@ def build_matcher(aliases: list[str]):
 
 
 def _as_utc(ts: datetime) -> datetime:
-    return ts.replace(tzinfo=timezone.utc) if ts.tzinfo is None else ts
+    return ts.replace(tzinfo=UTC) if ts.tzinfo is None else ts
 
 
 def run_chain(

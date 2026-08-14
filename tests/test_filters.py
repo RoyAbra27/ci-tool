@@ -1,23 +1,23 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from ci_tool.filters import build_matcher, canonicalize_url, compile_keyword, run_chain
 from ci_tool.models import RawItem
 
-NOW = datetime(2026, 8, 14, 12, 0, tzinfo=timezone.utc)
+NOW = datetime(2026, 8, 14, 12, 0, tzinfo=UTC)
 
 
 def make_item(**overrides) -> RawItem:
-    base = dict(
-        source_id="test-src",
-        trust_tier=1,
-        competitor="sonatype",
-        url="https://example.com/post",
-        title="A perfectly normal post title",
-        text="Body text about artifact registries.",
-        published_at=NOW - timedelta(days=1),
-        fetched_at=NOW,
-        raw_ref="test/ref.json",
-    )
+    base = {
+        "source_id": "test-src",
+        "trust_tier": 1,
+        "competitor": "sonatype",
+        "url": "https://example.com/post",
+        "title": "A perfectly normal post title",
+        "text": "Body text about artifact registries.",
+        "published_at": NOW - timedelta(days=1),
+        "fetched_at": NOW,
+        "raw_ref": "test/ref.json",
+    }
     base.update(overrides)
     return RawItem(**base)
 
@@ -59,8 +59,8 @@ class TestKeywordMatching:
 
 class TestRunChain:
     def kwargs(self, **overrides):
-        base = dict(now=NOW, recency_days=14, seen_ids=set(), seen_urls=set(),
-                    matcher=build_matcher(["sonatype", "cloudsmith"]))
+        base = {"now": NOW, "recency_days": 14, "seen_ids": set(), "seen_urls": set(),
+                "matcher": build_matcher(["sonatype", "cloudsmith"])}
         base.update(overrides)
         return base
 
@@ -83,7 +83,7 @@ class TestRunChain:
         assert counters["stale"] == 1
 
     def test_naive_datetime_treated_as_utc(self):
-        naive = make_item(published_at=datetime(2026, 8, 13, 12, 0))
+        naive = make_item(published_at=datetime(2026, 8, 13, 12, 0))  # noqa: DTZ001 - naive on purpose, this tests the naive path
         passed, _ = run_chain([naive], **self.kwargs())
         assert len(passed) == 1
 

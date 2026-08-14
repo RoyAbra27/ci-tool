@@ -5,7 +5,7 @@ empty seen-sets, reproducing the first ingest run. Prints JSON to stdout."""
 
 import json
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from ci_tool import filters, providers
 from ci_tool.cache import Fetcher, RawCache, SourceUnavailable
@@ -13,7 +13,7 @@ from ci_tool.models import load_config
 
 STALE_SAMPLE = 2
 # frozen so the sample is reproducible after the recency window moves on
-NOW = datetime(2026, 8, 14, 10, 20, 35, tzinfo=timezone.utc)
+NOW = datetime(2026, 8, 14, 10, 20, 35, tzinfo=UTC)
 
 
 def verdict(item, cutoff, batch_ids, matcher):
@@ -23,7 +23,7 @@ def verdict(item, cutoff, batch_ids, matcher):
     item = item.model_copy(update={"url": url})
     published = item.published_at or item.fetched_at
     if published.tzinfo is None:
-        published = published.replace(tzinfo=timezone.utc)
+        published = published.replace(tzinfo=UTC)
     if published < cutoff:
         return "stale", item
     content_id = item.content_hash()

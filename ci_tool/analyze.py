@@ -4,7 +4,7 @@ prompt is deterministic, so a replayed run replays the re-ask too."""
 
 import hashlib
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from pydantic import ValidationError
@@ -48,7 +48,7 @@ def analyze(*, live: bool, config_path: str = "config.toml") -> dict:
     model = cfg.llm.model
     template, prompt_version = load_prompt()
     schema = llm.strict_schema(InsightExtraction)
-    run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + "-analyze"
+    run_id = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ") + "-analyze"
     counters = {"clusters": 0, "extracted": 0, "reasked": 0, "quarantined": 0,
                 "skipped_unavailable": 0, "llm_errors": 0}
     error_detail: dict[str, str] = {}
@@ -83,7 +83,7 @@ def analyze(*, live: bool, config_path: str = "config.toml") -> dict:
                 except (SourceUnavailable, llm.LLMUnavailable):
                     counters["skipped_unavailable"] += 1
                     continue
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001 - counted as llm_errors, the run continues
                     counters["llm_errors"] += 1
                     error_detail[cluster_id[:12]] = f"{type(e).__name__}: {e}"[:160]
                     continue

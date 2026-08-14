@@ -1,4 +1,4 @@
-from datetime import timezone
+from datetime import UTC
 
 import pytest
 
@@ -67,7 +67,7 @@ def test_rss_parses_strips_html_and_skips_missing_link():
     assert "Hello world" in item.text
     assert item.published_at is not None
     assert item.published_at.tzinfo is not None
-    assert item.published_at.utcoffset() == timezone.utc.utcoffset(None)
+    assert item.published_at.utcoffset() == UTC.utcoffset(None)
 
 
 def test_github_releases_prefixes_title_with_repo():

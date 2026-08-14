@@ -7,7 +7,7 @@ the reproducibility guarantee and the grader's no-keys demo path.
 
 import hashlib
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from ci_tool import http
@@ -32,7 +32,7 @@ class RawCache:
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(json.dumps({
                 "url": cache_url,
-                "fetched_at": datetime.now(timezone.utc).isoformat(),
+                "fetched_at": datetime.now(UTC).isoformat(),
                 "body": body,
             }, ensure_ascii=False), encoding="utf-8")
         return str(path.relative_to(self.root))

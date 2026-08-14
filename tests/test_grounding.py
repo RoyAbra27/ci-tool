@@ -8,14 +8,14 @@ SOURCE = (
 
 
 def make_extraction(**overrides) -> InsightExtraction:
-    base = dict(
-        summary="Cloudsmith raised $72M in Series C funding.",
-        category="funding",
-        themes=[],
-        entities=["Cloudsmith", "TCV"],
-        numbers=["$72M"],
-        quote="Cloudsmith today announced it has raised $72M in Series C funding led by TCV.",
-    )
+    base = {
+        "summary": "Cloudsmith raised $72M in Series C funding.",
+        "category": "funding",
+        "themes": [],
+        "entities": ["Cloudsmith", "TCV"],
+        "numbers": ["$72M"],
+        "quote": "Cloudsmith today announced it has raised $72M in Series C funding led by TCV.",
+    }
     base.update(overrides)
     return InsightExtraction(**base)
 

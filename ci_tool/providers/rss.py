@@ -1,7 +1,7 @@
 """RSS/Atom provider. Also supplies the feed-parsing helper github_releases reuses."""
 
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from html.parser import HTMLParser
 
 import feedparser
@@ -34,7 +34,7 @@ def _best_text(entry) -> str:
 def _to_datetime(struct_time: time.struct_time | None) -> datetime | None:
     if struct_time is None:
         return None
-    return datetime(*struct_time[:6], tzinfo=timezone.utc)
+    return datetime(*struct_time[:6], tzinfo=UTC)
 
 
 def _parse_entry(entry, source: SourceConfig, raw_ref: str, fetched_at: datetime) -> RawItem | None:
@@ -58,7 +58,7 @@ def _parse_entry(entry, source: SourceConfig, raw_ref: str, fetched_at: datetime
 
 def parse_feed(body: str, source: SourceConfig, raw_ref: str) -> list[RawItem]:
     """Entries of one RSS/Atom body, skipping any without a url and title."""
-    fetched_at = datetime.now(timezone.utc)
+    fetched_at = datetime.now(UTC)
     items = (
         _parse_entry(entry, source, raw_ref, fetched_at)
         for entry in feedparser.parse(body).entries

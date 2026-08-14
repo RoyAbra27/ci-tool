@@ -11,6 +11,7 @@ insight's quote must appear verbatim in its source item text)."""
 import json
 import sqlite3
 import sys
+from pathlib import Path
 
 
 def gate_metrics(labels, verdicts):
@@ -69,8 +70,8 @@ def quote_back_metrics(quotes_and_texts):
 
 
 def main():
-    labels = json.load(open("eval/labels.json", encoding="utf-8"))["items"]
-    sample = json.load(open("eval/sample.json", encoding="utf-8"))
+    labels = json.loads(Path("eval/labels.json").read_text(encoding="utf-8"))["items"]
+    sample = json.loads(Path("eval/sample.json").read_text(encoding="utf-8"))
     verdicts = {x["url"]: x["pipeline_verdict"] for x in sample}
 
     conn = sqlite3.connect("data/ci.db")

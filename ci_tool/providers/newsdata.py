@@ -5,7 +5,7 @@ import json
 import os
 import sys
 import urllib.parse
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from ci_tool.cache import Fetcher
 from ci_tool.models import RawItem, SourceConfig
@@ -17,7 +17,7 @@ def _parse_pubdate(pub_date) -> datetime | None:
     if not isinstance(pub_date, str):
         return None
     try:
-        return datetime.strptime(pub_date, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+        return datetime.strptime(pub_date, "%Y-%m-%d %H:%M:%S").replace(tzinfo=UTC)
     except ValueError:
         return None
 
@@ -35,7 +35,7 @@ def fetch(source: SourceConfig, fetcher: Fetcher) -> list[RawItem]:
     # so repeating it here would send q twice
     params = {"apikey": os.environ.get("NEWSDATA_API_KEY", "")}
     body, raw_ref = fetcher.get_text(source.id, cache_url, params=params)
-    fetched_at = datetime.now(timezone.utc)
+    fetched_at = datetime.now(UTC)
 
     results = json.loads(body).get("results", [])
     items = []

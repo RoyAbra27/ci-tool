@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
@@ -7,7 +7,7 @@ from ci_tool import db, llm
 from ci_tool.analyze import analyze
 from ci_tool.models import RawItem
 
-NOW = datetime(2026, 8, 14, 12, 0, tzinfo=timezone.utc)
+NOW = datetime(2026, 8, 14, 12, 0, tzinfo=UTC)
 
 VALID_JSON = json.dumps({
     "summary": "Cloudsmith raised $72M in Series C funding.",

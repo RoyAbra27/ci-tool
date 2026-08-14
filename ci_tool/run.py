@@ -1,7 +1,7 @@
 """Pipeline entry: fetch (live or replay), filter, fingerprint, cluster, store.
 One linear pass; a broken source is a counted status line, never a dead run."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from ci_tool import db, filters, fingerprint, providers
@@ -13,7 +13,7 @@ def run(*, live: bool, config_path: str = "config.toml") -> dict:
     cfg = load_config(config_path)
     root = Path(config_path).resolve().parent
     fetcher = Fetcher(RawCache(root / cfg.settings.raw_dir), live)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     run_id = now.strftime("%Y%m%dT%H%M%SZ")
 
     items = []
@@ -25,7 +25,7 @@ def run(*, live: bool, config_path: str = "config.toml") -> dict:
             source_status[source.id] = f"ok:{len(fetched)}"
         except SourceUnavailable:
             source_status[source.id] = "no_cache"
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - a broken source is a status line, never a dead run
             source_status[source.id] = f"error:{type(e).__name__}:{e}"[:200]
 
     conn = db.connect(root / cfg.settings.db_path)

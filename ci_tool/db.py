@@ -3,7 +3,7 @@ to delete and rebuilds from them. The events table is append-only provenance."""
 
 import json
 import sqlite3
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from ci_tool.models import RawItem
@@ -96,7 +96,7 @@ def recent_fingerprints(conn: sqlite3.Connection, since_iso: str) -> list[tuple[
 
 
 def _now() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 def add_event(conn: sqlite3.Connection, item_id: str, event: str, detail: str = "") -> None:
