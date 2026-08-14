@@ -24,6 +24,12 @@ uv run python -m ci_tool run --live      # fetch feeds, update the raw cache
 uv run python -m ci_tool analyze --live  # call the LLM for new clusters (GROQ_API_KEY)
 ```
 
+"Daily" is any scheduler running those two commands, e.g. cron:
+
+```
+0 7 * * *  cd /path/to/ci-tool && uv run python -m ci_tool run --live && uv run python -m ci_tool analyze --live
+```
+
 ## The web UI
 
 Four views, reading only from SQLite:
