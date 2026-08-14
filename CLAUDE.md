@@ -9,6 +9,7 @@ Competitive intelligence pipeline: deterministic ingest -> filter -> dedup -> bo
 - `uv run python -m ci_tool run --summary` - replay from cache, zero network, zero keys
 - `uv run python -m ci_tool analyze --live --summary` - LLM extraction stage (needs GROQ_API_KEY; caches responses)
 - `uv run python -m ci_tool analyze --summary` - LLM stage from cached responses
+- `uv run python eval/run_eval.py` - score pipeline against eval/labels.json (regenerate the frozen sample with `uv run python eval/build_sample.py > eval/sample.json`)
 
 ## Doctrine (do not violate)
 
