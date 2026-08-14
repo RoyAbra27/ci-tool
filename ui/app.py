@@ -100,7 +100,7 @@ def render_insight(insight: pd.Series) -> None:
 
 
 def view_daily_digest() -> None:
-    st.header("Daily digest")
+    st.header(":green[:material/today:] Daily digest")
     dates = query_df("SELECT DISTINCT date(created_at) AS d FROM insights ORDER BY d DESC")
     if dates.empty:
         st.info("No insights yet. Run `uv run python -m ci_tool analyze` to populate the digest.")
@@ -121,13 +121,13 @@ def view_daily_digest() -> None:
     competitors = insights["competitor"].fillna("")
     for name in sorted(competitors.unique(), key=lambda c: (c == "", c)):
         group = insights[competitors == name]
-        st.subheader(f"{display_name(name)} ({len(group)})")
+        st.subheader(f"{display_name(name)} :gray[({len(group)})]")
         for _, insight in group.iterrows():
             render_insight(insight)
 
 
 def view_competitor_timeline() -> None:
-    st.header("Competitor timeline")
+    st.header(":green[:material/timeline:] Competitor timeline")
     insights = query_df("SELECT * FROM insights")
     if insights.empty:
         st.info("No insights yet.")
@@ -179,7 +179,7 @@ def view_competitor_timeline() -> None:
 
 
 def view_item_explorer() -> None:
-    st.header("Item explorer")
+    st.header(":green[:material/search:] Item explorer")
     items = query_df("SELECT * FROM items")
     if items.empty:
         st.info("No items in the database yet.")
@@ -248,7 +248,7 @@ def view_item_explorer() -> None:
 
 
 def view_run_report() -> None:
-    st.header("Run report")
+    st.header(":green[:material/monitor_heart:] Run report")
 
     items_count = len(query_df("SELECT id FROM items"))
     insights_count = len(query_df("SELECT cluster_id FROM insights"))
@@ -303,6 +303,7 @@ def main() -> None:
             st.Page(view_run_report, title="Run report", icon=":material/monitor_heart:"),
         ]
     )
+    st.sidebar.markdown("### :green[:material/radar:] CI Tool")
     st.sidebar.caption("Read-only view over data/ci.db. Every insight is quote-backed; failures are quarantined, never hidden.")
     page.run()
 

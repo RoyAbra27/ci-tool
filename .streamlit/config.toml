@@ -1,14 +1,14 @@
-# JFrog-flavored dark theme: deep navy-charcoal ground, JFrog green accent.
+# JFrog-flavored dark theme: near-black charcoal ground, JFrog green accent.
 
 [theme]
 base = "dark"
 primaryColor = "#40BE46"
-backgroundColor = "#0B141C"
-secondaryBackgroundColor = "#13232F"
-codeBackgroundColor = "#0F1B25"
+backgroundColor = "#0F1113"
+secondaryBackgroundColor = "#1A1E20"
+codeBackgroundColor = "#15191B"
 textColor = "#E6EDF3"
 linkColor = "#5BD262"
-borderColor = "#22384A"
+borderColor = "#2B3134"
 showWidgetBorder = true
 showSidebarBorder = true
 baseRadius = "8px"
@@ -32,15 +32,15 @@ yellowColor = "#EAB308"
 orangeColor = "#F97316"
 violetColor = "#9B7BF0"
 
-dataframeBorderColor = "#22384A"
-dataframeHeaderBackgroundColor = "#13232F"
+dataframeBorderColor = "#2B3134"
+dataframeHeaderBackgroundColor = "#1A1E20"
 
 [theme.sidebar]
-backgroundColor = "#081019"
-secondaryBackgroundColor = "#13232F"
-codeBackgroundColor = "#0F1B25"
+backgroundColor = "#0A0C0D"
+secondaryBackgroundColor = "#1A1E20"
+codeBackgroundColor = "#15191B"
 textColor = "#E6EDF3"
-borderColor = "#22384A"
+borderColor = "#2B3134"
 primaryColor = "#40BE46"
-dataframeHeaderBackgroundColor = "#13232F"
-dataframeBorderColor = "#22384A"
+dataframeHeaderBackgroundColor = "#1A1E20"
+dataframeBorderColor = "#2B3134"
