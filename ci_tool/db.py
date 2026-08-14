@@ -146,7 +146,7 @@ def quarantine_add(conn: sqlite3.Connection, ref_id: str, stage: str, error: str
     )
 
 
-def add_insight(conn: sqlite3.Connection, **f) -> None:
+def add_insight(conn: sqlite3.Connection, **fields) -> None:
     conn.execute(
         "INSERT OR REPLACE INTO insights"
         "(cluster_id, run_id, provider, model, prompt_version, summary, category,"
@@ -154,7 +154,7 @@ def add_insight(conn: sqlite3.Connection, **f) -> None:
         " VALUES(:cluster_id, :run_id, :provider, :model, :prompt_version, :summary,"
         " :category, :themes, :entities, :numbers, :quote, :confidence, :competitor,"
         " :item_count, :created_at)",
-        {**f, "created_at": _now()},
+        {**fields, "created_at": _now()},
     )
 
 

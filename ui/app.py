@@ -4,11 +4,11 @@ stage (insights, runs, quarantine) may be missing entirely, not just
 empty, so every query is guarded against sqlite3.OperationalError."""
 
 import json
+import sqlite3
 from datetime import timedelta
 from pathlib import Path
 
 import pandas as pd
-import sqlite3
 import streamlit as st
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -102,11 +102,12 @@ def view_daily_digest() -> None:
         st.info("No insights for this date.")
         return
 
-    groups = insights.groupby("competitor", dropna=False, sort=False)
-    ordered_keys = sorted(groups.groups.keys(), key=lambda k: (k is None, k or ""))
-    for competitor in ordered_keys:
-        st.subheader(competitor or "Industry")
-        for _, insight in groups.get_group(competitor).iterrows():
+    # insights with no competitor are industry news; pandas turns that NULL into
+    # NaN, which is unsortable against the competitor names, so name it first
+    competitors = insights["competitor"].fillna("")
+    for name in sorted(competitors.unique(), key=lambda c: (c == "", c)):
+        st.subheader(name or "Industry")
+        for _, insight in insights[competitors == name].iterrows():
             render_insight(insight)
 
 
@@ -145,16 +146,13 @@ def view_competitor_timeline() -> None:
         date_str = row["published_at"].date().isoformat() if pd.notna(row["published_at"]) else "unknown"
         st.markdown(f"**{date_str}** - {row['competitor'] or 'Industry'} - {row['category']} - {row['summary']}")
 
-    counts = filtered.groupby(["competitor", "category"]).size().reset_index(name="count")
-    if not counts.empty:
-        chart_data = counts.pivot(index="competitor", columns="category", values="count").fillna(0)
-        st.bar_chart(chart_data)
-
-    st.subheader("Insight counts by competitor and category")
-    table = filtered.pivot_table(
+    counts = filtered.pivot_table(
         index="competitor", columns="category", values="cluster_id", aggfunc="count", fill_value=0
     )
-    st.dataframe(table)
+    if not counts.empty:
+        st.bar_chart(counts)
+    st.subheader("Insight counts by competitor and category")
+    st.dataframe(counts)
 
 
 def view_item_explorer() -> None:
@@ -188,8 +186,7 @@ def view_item_explorer() -> None:
 
     options = (filtered["title"] + " (" + filtered["id"].str[:8] + ")").tolist()
     picked_label = st.selectbox("Select item for detail", options)
-    picked_id = filtered.iloc[options.index(picked_label)]["id"]
-    item = filtered[filtered["id"] == picked_id].iloc[0]
+    item = filtered.iloc[options.index(picked_label)]
 
     st.subheader(item["title"])
     st.markdown(f"[{item['url']}]({item['url']})")

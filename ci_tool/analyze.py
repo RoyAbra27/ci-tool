@@ -28,7 +28,7 @@ def _source_block(rows) -> str:
     return "\n\n".join(
         f"SOURCE (feed: {r['source_id']}, url: {r['url']}, published: {r['published_at']})\n"
         f"TITLE: {r['title']}\n{r['text'][:MAX_CHARS_PER_ITEM]}"
-        for r in rows[:MAX_ITEMS_PER_CLUSTER]
+        for r in rows
     )
 
 
@@ -45,7 +45,7 @@ def analyze(*, live: bool, config_path: str = "config.toml") -> dict:
     root = Path(config_path).resolve().parent
     cache = RawCache(root / cfg.settings.raw_dir)
     provider = cfg.llm.provider
-    model = cfg.llm.model_for(provider)
+    model = cfg.llm.model
     template, prompt_version = load_prompt()
     schema = llm.strict_schema(InsightExtraction)
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + "-analyze"
@@ -53,19 +53,20 @@ def analyze(*, live: bool, config_path: str = "config.toml") -> dict:
                 "skipped_unavailable": 0, "llm_errors": 0}
     error_detail: dict[str, str] = {}
 
+    def ask(prompt: str) -> str:
+        return llm.complete_json(
+            prompt, provider=provider, model=model, schema=schema, cache=cache, live=live
+        )
+
     conn = db.connect(root / cfg.settings.db_path)
     try:
         clusters = db.unanalyzed_clusters(conn)
         counters["clusters"] = len(clusters)
         with conn:
             for cluster_id, rows in clusters.items():
-                source_text = " ".join(f"{r['title']} {r['text']}" for r in rows[:MAX_ITEMS_PER_CLUSTER])
-                prompt = template.replace("{sources}", _source_block(rows))
-
-                def ask(p):
-                    return llm.complete_json(
-                        p, provider=provider, model=model, schema=schema, cache=cache, live=live
-                    )
+                sent = rows[:MAX_ITEMS_PER_CLUSTER]
+                source_text = " ".join(f"{r['title']} {r['text']}" for r in sent)
+                prompt = template.replace("{sources}", _source_block(sent))
 
                 try:
                     raw = ask(prompt)

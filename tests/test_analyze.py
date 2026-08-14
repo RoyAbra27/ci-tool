@@ -77,10 +77,8 @@ def test_valid_extraction_lands_in_insights(repo, monkeypatch):
 def test_reask_recovers_from_ungrounded_first_answer(repo, monkeypatch):
     fake, calls = fake_llm([UNGROUNDED_JSON, VALID_JSON])
     monkeypatch.setattr(llm, "complete_json", fake)
-    report = analyze(live=True, config_path=str(repo / "config.toml"))
-    assert report["counters"] == pytest.approx(
-        {**report["counters"], "extracted": 1, "reasked": 1, "quarantined": 0}
-    )
+    counters = analyze(live=True, config_path=str(repo / "config.toml"))["counters"]
+    assert (counters["extracted"], counters["reasked"], counters["quarantined"]) == (1, 1, 0)
     assert len(calls) == 2
     assert "rejected by mechanical verification" in calls[1]
 

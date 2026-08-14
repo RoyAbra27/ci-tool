@@ -45,8 +45,9 @@ class LLMConfig(BaseModel):
     groq_model: str = "openai/gpt-oss-120b"
     gemini_model: str = "gemini-2.5-flash"
 
-    def model_for(self, provider: str) -> str:
-        return {"groq": self.groq_model, "gemini": self.gemini_model}[provider]
+    @property
+    def model(self) -> str:
+        return {"groq": self.groq_model, "gemini": self.gemini_model}[self.provider]
 
 
 class AppConfig(BaseModel):

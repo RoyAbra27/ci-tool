@@ -14,7 +14,8 @@ _SCHEMA_KEYWORDS_TO_STRIP = {"minLength", "maxLength", "default"}
 
 
 class LLMUnavailable(Exception):
-    """Missing key in live mode, or cache miss in replay mode."""
+    """No API key for the configured provider. A replay cache miss raises
+    SourceUnavailable instead; analyze treats both as skip, not failure."""
 
 
 def strict_schema(model_cls) -> dict:
