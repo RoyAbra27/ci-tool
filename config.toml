@@ -1,0 +1,111 @@
+# Deterministic pipeline configuration. Adding a competitor or source is a
+# config change, not a code change.
+
+[settings]
+recency_days = 14
+cluster_window_days = 90
+raw_dir = "data/raw"
+db_path = "data/ci.db"
+
+# trust_tier: 1 = vendor's own words (blog/changelog/releases),
+#             2 = official platform changelogs, 3 = third-party news.
+# Tier 1-2 feeds pass relevance by construction (the whole feed is on-topic);
+# tier 3 items must match a tracked entity alias.
+
+[[competitors]]
+id = "jfrog"
+name = "JFrog"
+tier = 0 # ourselves; tracked so the digest shows our own announcements too
+aliases = ["jfrog", "artifactory", "xray", "apptrust", "jfrog fly"]
+
+[[competitors]]
+id = "sonatype"
+name = "Sonatype"
+tier = 1
+aliases = ["sonatype", "nexus repository", "nexus lifecycle", "nexus firewall"]
+
+[[competitors]]
+id = "cloudsmith"
+name = "Cloudsmith"
+tier = 1
+aliases = ["cloudsmith"]
+
+[[competitors]]
+id = "github"
+name = "GitHub"
+tier = 2
+aliases = ["github packages", "github artifact", "github advanced security", "dependabot"]
+
+[[competitors]]
+id = "gitlab"
+name = "GitLab"
+tier = 2
+aliases = ["gitlab"]
+
+[[competitors]]
+id = "snyk"
+name = "Snyk"
+tier = 3
+aliases = ["snyk"]
+
+[[sources]]
+id = "sonatype-blog"
+provider = "rss"
+url = "https://www.sonatype.com/blog/rss.xml"
+trust_tier = 1
+competitor = "sonatype"
+
+[[sources]]
+id = "cloudsmith-blog"
+provider = "rss"
+url = "https://cloudsmith.com/rss/blog.xml"
+trust_tier = 1
+competitor = "cloudsmith"
+
+[[sources]]
+id = "jfrog-blog"
+provider = "rss"
+url = "https://jfrog.com/blog/feed/"
+trust_tier = 1
+competitor = "jfrog"
+
+[[sources]]
+id = "github-changelog"
+provider = "rss"
+url = "https://github.blog/changelog/feed/"
+trust_tier = 2
+competitor = "github"
+
+[[sources]]
+id = "gitlab-releases"
+provider = "rss"
+url = "https://docs.gitlab.com/releases/all-releases.xml"
+trust_tier = 2
+competitor = "gitlab"
+
+[[sources]]
+id = "snyk-blog"
+provider = "rss"
+url = "https://snyk.io/blog/feed/"
+trust_tier = 3
+competitor = "snyk"
+
+[[sources]]
+id = "releases-nexus-public"
+provider = "github_releases"
+repo = "sonatype/nexus-public"
+trust_tier = 1
+competitor = "sonatype"
+
+[[sources]]
+id = "releases-cloudsmith-cli"
+provider = "github_releases"
+repo = "cloudsmith-io/cloudsmith-cli"
+trust_tier = 1
+competitor = "cloudsmith"
+
+[[sources]]
+id = "newsdata"
+provider = "newsdata"
+trust_tier = 3
+query = "JFrog OR Sonatype OR Cloudsmith OR Artifactory"
