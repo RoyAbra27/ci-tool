@@ -60,9 +60,9 @@ false positives are all first-party blog posts (thought leadership, event
 previews, an educational listicle). The gate deliberately trusts tier 1-2
 feeds for recall; the extraction stage then categorized 7 of the 8 as
 `marketing_content` or routine `product_release` (the eighth became `other`),
-and the UI surfaces those categories as badges. Nothing demotes them yet -
-category-aware digest ranking is a ROADMAP item. The precision number is the
-honest cost of that recall-first choice.
+and the UI surfaces those categories as badges and sinks `marketing_content`
+and `other` to the bottom of each competitor's digest group (2026-08-15).
+The precision number is the honest cost of that recall-first choice.
 
 **The entity matcher missed product names (now fixed, partially).** Three
 genuinely relevant Snyk posts (an Evo case study, a rebuilt Evo risk-scoring

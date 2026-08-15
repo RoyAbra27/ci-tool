@@ -58,16 +58,6 @@ and a paid news tier.
 **Revisit when:** measured misses justify the fetch cost; one residual miss
 in 40 items does not.
 
-## Category-aware digest ranking
-
-**Deferred.** Tier 1-2 sources pass the gate unconditionally (recall-first
-by design), so first-party marketing lands in the digest alongside product
-news. The extraction stage already labels it (`marketing_content`), and the
-UI shows category badges, but nothing demotes or folds those items yet.
-
-**Revisit when:** digest readers report noise; the demotion is a sort key
-on the existing category column, no new data needed.
-
 ## NewsData industry-news coverage tuning
 
 **Partially validated.** The first fully-live run (2026-08-15, 9/9 sources

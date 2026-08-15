@@ -16,6 +16,15 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 DB_PATH = REPO_ROOT / "data" / "ci.db"
 
 CONFIDENCE_COLOR = {"high": "green", "medium": "orange", "low": "gray"}
+LOW_SIGNAL_CATEGORIES = ("marketing_content", "other")
+
+
+def demote_low_signal(insights: pd.DataFrame) -> pd.DataFrame:
+    """kind='stable' is load-bearing: pandas' default sort is not stable,
+    and arrival order must survive within each band."""
+    return insights.sort_values(
+        "category", key=lambda s: s.isin(LOW_SIGNAL_CATEGORIES), kind="stable"
+    )
 
 st.set_page_config(page_title="CI Tool", page_icon=":material/radar:", layout="wide")
 
@@ -109,7 +118,9 @@ def view_daily_digest() -> None:
     left, right = st.columns([1, 3], vertical_alignment="bottom")
     with left:
         picked = st.selectbox("Digest date", dates["d"].tolist(), index=0)
-    insights = query_df("SELECT * FROM insights WHERE date(created_at) = ?", (picked,))
+    insights = demote_low_signal(
+        query_df("SELECT * FROM insights WHERE date(created_at) = ?", (picked,))
+    )
     with right:
         st.caption(f"{len(insights)} insights, every one quote-backed and source-linked")
     if insights.empty:
@@ -308,4 +319,7 @@ def main() -> None:
     page.run()
 
 
-main()
+# streamlit run still executes this as __main__; the guard only unblocks
+# test imports of demote_low_signal
+if __name__ == "__main__":
+    main()
