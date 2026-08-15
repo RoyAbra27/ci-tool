@@ -48,6 +48,20 @@ name = "Snyk"
 tier = 3
 aliases = ["snyk"]
 
+[[competitors]]
+id = "harness"
+name = "Harness"
+tier = 3
+# "harness" alone is a generic English word (test harness) and would poison
+# the tier-3 substring gate; precise aliases trade recall for precision
+aliases = ["harness.io", "harness platform", "harness cd", "harness ci"]
+
+[[competitors]]
+id = "mlflow"
+name = "MLflow"
+tier = 3
+aliases = ["mlflow"]
+
 [[sources]]
 id = "sonatype-blog"
 provider = "rss"
@@ -103,6 +117,20 @@ provider = "github_releases"
 repo = "cloudsmith-io/cloudsmith-cli"
 trust_tier = 1
 competitor = "cloudsmith"
+
+[[sources]]
+id = "harness-blog"
+provider = "rss"
+url = "https://www.harness.io/blog/rss.xml"
+trust_tier = 1
+competitor = "harness"
+
+[[sources]]
+id = "releases-mlflow"
+provider = "github_releases"
+repo = "mlflow/mlflow"
+trust_tier = 1
+competitor = "mlflow"
 
 [[sources]]
 id = "newsdata"

@@ -12,6 +12,8 @@
 | snyk-blog | rss | Snyk | 3 | https://snyk.io/blog/feed/ |
 | releases-nexus-public | github_releases | Sonatype | 1 | sonatype/nexus-public |
 | releases-cloudsmith-cli | github_releases | Cloudsmith | 1 | cloudsmith-io/cloudsmith-cli |
+| harness-blog | rss | Harness | 1 | https://www.harness.io/blog/rss.xml |
+| releases-mlflow | github_releases | MLflow | 1 | mlflow/mlflow |
 | newsdata | newsdata | (query: JFrog OR Sonatype OR Cloudsmith OR Artifactory) | 3 | newsdata.io API |
 
 Full definitions, competitor aliases, and per-source trust tiers live in
@@ -30,6 +32,15 @@ Full definitions, competitor aliases, and per-source trust tiers live in
   before they are treated as relevant (entity-match gating).
 
 ## Considered and dropped
+
+- **Socket, Black Duck, Checkmarx, Weights & Biases blogs** (checked
+  2026-08-15): no machine-readable feed found - RSS paths return 404/403 or
+  HTML. Tracking them would mean scraping (ToS risk, breaks on redesign),
+  which this pipeline rejects by policy. Revisit if they publish feeds.
+- **Harness alias caveat**: "harness" is a generic English word, so the
+  tier-3 entity gate uses precise aliases (harness.io, harness platform)
+  rather than the bare name - precision over recall, third-party mentions
+  of Harness may be missed.
 
 - **GitLab blog, all-posts feed** (`about.gitlab.com/atom.xml`): kept only
   as a fallback candidate. The docs releases feed
