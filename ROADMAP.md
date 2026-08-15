@@ -68,17 +68,18 @@ UI shows category badges, but nothing demotes or folds those items yet.
 **Revisit when:** digest readers report noise; the demotion is a sort key
 on the existing category column, no new data needed.
 
-## NewsData provider live validation
+## NewsData industry-news coverage tuning
 
-**Deferred.** `ci_tool/providers/newsdata.py` is tested against fixtures;
-a first successful live fetch (with a correctly-loaded key - see
-CHALLENGES.md) is still pending. Expected live behavior: NewsData's free
-tier delivers articles roughly 12 hours delayed and snippet-only, which
-feeds the extraction stage at headline level rather than full-article
-depth.
+**Partially validated.** The first fully-live run (2026-08-15, 9/9 sources
+ok) confirmed the provider works end to end: 10 articles fetched, cached,
+and filtered. None passed the entity gate that run - general industry news
+rarely names a tracked competitor in its snippet, and the free tier is
+snippet-only. The channel is mechanically proven but not yet contributing
+digest items.
 
-**Revisit when:** a live NewsData key is confirmed working end to end, to
-check that assumption against real output.
+**Revisit when:** the query terms are broadened per competitor product
+names (same fix as the alias item above) or a full-text news tier is
+justified; measure contribution per run before paying for either.
 
 ## Streamlit `st.logo` wordmark polish
 
