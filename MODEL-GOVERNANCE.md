@@ -17,7 +17,8 @@ selection and the pinned IDs are defined in `ci_tool/models.py`
 ## Prompt versioning
 
 `prompts/extract.md` is content-addressed: its `prompt_version` is the first
-12 hex characters of its own sha256 (currently `55bea48e75b4`). This value is:
+12 hex characters of its own sha256 (currently `0d7fc218bf8e`; v1, which
+produced the original eval numbers, was `55bea48e75b4`). This value is:
 
 - stored on every insight row in the database, so any extraction can be
   traced back to the exact prompt text that produced it

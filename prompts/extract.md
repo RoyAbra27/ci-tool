@@ -8,10 +8,15 @@ Return JSON matching the provided schema exactly. Field rules:
 - summary: 1-2 sentences of plain fact stated by the sources. No opinion, no
   implications, no strategy language.
 - category: exactly one label.
-  Calibration: product_release only for shipped software (GA, beta, patch),
-  not roadmap talk. marketing_content for vendor thought-leadership with no
-  concrete event. security_research for vulnerability reports, threat
-  analyses, malware findings.
+  Calibration: product_release for shipped software (GA, beta, patch) and
+  lifecycle changes to shipped software (deprecation, end of life), not
+  roadmap talk. partnership when the event is two named companies acting
+  together (integration, alliance), even when software ships with it.
+  marketing_content for vendor thought-leadership, event recaps, and
+  customer case studies: the vendor talking rather than a concrete event.
+  security_research only for original security findings (vulnerability
+  reports, threat analyses, malware research); a vendor showcasing what its
+  own product found is marketing_content.
 - themes: JFrog focus themes the sources DIRECTLY touch. Glossary:
   agentic_supply_chain = AI agents operating on the software supply chain;
   fly = JFrog Fly agentic repository; apptrust = JFrog AppTrust release

@@ -10,6 +10,8 @@ sample. No LLM judges anything here; every metric is computed by
 >
 > Gate update 2026-08-15: the product-alias fix this eval motivated (see
 > "before and after" below) has been applied; labels were not touched.
+> Prompt update 2026-08-15: category calibration v2 (see "Prompt v2"
+> below); labels still untouched.
 
 ## Method
 
@@ -53,6 +55,33 @@ accuracy *dropped* because both recovered posts were then misclassified by
 the model - two new taxonomy-boundary cases, discussed below. That is the
 honest trade: the gate fix surfaced harder items for the next stage.
 
+## Prompt v2: category calibration
+
+All five post-alias mismatches traced to the same cause: the prompt's
+calibration block covered only 3 of the 9 categories. `partnership` was
+never mentioned, lifecycle changes (deprecations) had no home, and nothing
+separated event recaps or vendor case studies from original research.
+Prompt v2 (`0d7fc218bf8e`, was `55bea48e75b4`) adds three calibration
+rules for exactly those gaps; every cluster was re-extracted live and
+re-scored against the same 40 items and unchanged labels:
+
+| Metric | Prompt v1 | Prompt v2 |
+|---|---|---|
+| Classification accuracy | 0.84 (27 of 32) | 0.91 (29 of 32) |
+| Quote-back faithfulness | 1.00 | 1.00 |
+| Quarantined | 1 | 1 (same cluster, same invented date) |
+
+Gate and dedup numbers are prompt-independent and did not move. Of the
+five v1 mismatches, three fixed (the Black Hat recap, the Artifactory +
+Google integration, the model-deprecation notice), two survived (both Evo
+posts, discussed below), and the new partnership rule introduced one
+regression: a Gemini-model-availability changelog inside GitHub Copilot
+now reads as `partnership` (label: `product_release`) - the rule overshoots
+when one company's model ships inside another company's product. Net 5
+mismatches to 3. The same Nexus cluster quarantined again under v2 for the
+same fabricated date, so the fail-closed path reproduces across prompt
+versions.
+
 ## Failure modes, honestly
 
 **Tier 1-2 sources pass unconditionally, so marketing passes too.** The 8
@@ -73,14 +102,14 @@ cached text and remains the measured cost of gating tier-3 sources on
 entity mentions in the snippet the feed provides.
 
 **Classification mismatches are taxonomy-boundary cases, not hallucinations.**
-The original three: a Black Hat conference recap (model: `other`, label:
-`marketing_content`), the Artifactory + Google Artifact Registry integration
-(model: `product_release`, label: `partnership`), and a model-deprecation
-notice (model: `marketing_content`, label: `product_release`). The two
-recovered Evo posts added two more: a customer case study the model read as
-`security_research`, and a rebuilt-capability announcement it read as
-`marketing_content` (label: `product_release`). Each is defensible either
-way; none invents facts.
+Under prompt v2, three remain. The two Evo posts resisted the calibration:
+a customer case study built around security findings still reads as
+`security_research` (label: `marketing_content`), and a rebuilt-capability
+announcement still reads as `marketing_content` (label: `product_release`) -
+Snyk's own framing genuinely blurs those lines. The third is the v2
+regression named above (Gemini in Copilot as `partnership`). Each is
+defensible either way; none invents facts. The five v1 mismatches and what
+fixed them are in the prompt v2 section.
 
 **The quarantine caught a real grounding failure.** One extraction summarized
 a Nexus release with the date "2026-08-06" written as separate numbers that do
