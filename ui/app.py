@@ -106,6 +106,29 @@ def badge_line(category: str, themes: list, confidence: str) -> str:
     return " ".join(parts)
 
 
+def competitor_groups(insights: pd.DataFrame):
+    """UI order: named competitors alphabetically, industry (no competitor) last."""
+    competitors = insights["competitor"].fillna("")
+    for name in sorted(competitors.unique(), key=lambda c: (c == "", c)):
+        yield name, insights[competitors == name]
+
+
+def digest_markdown(insights: pd.DataFrame, links: pd.DataFrame, date_str: str) -> str:
+    lines = [f"# Competitive intelligence digest - {date_str}", ""]
+    for name, group in competitor_groups(insights):
+        lines.append(f"## {display_name(name)}")
+        for _, ins in group.iterrows():
+            lines.append(
+                f"- **{ins['summary']}**"
+                f" ({category_label(ins['category'])}, {ins['confidence']} confidence)"
+            )
+            lines.append(f"  > {ins['quote']}")
+            for _, item in links[links["cluster_id"] == ins["cluster_id"]].iterrows():
+                lines.append(f"  - [{source_label(item['source_id'])}]({item['url']})")
+        lines.append("")
+    return "\n".join(lines)
+
+
 def render_insight(insight: pd.Series) -> None:
     themes = _json_list(insight["themes"])
     with st.container(border=True):
@@ -151,11 +174,21 @@ def view_daily_digest() -> None:
     c3.metric("Marketing & misc", len(insights) - events, border=True)
     c4.metric("Competitors covered", insights["competitor"].dropna().nunique(), border=True)
 
-    # insights with no competitor are industry news; pandas turns that NULL into
-    # NaN, which is unsortable against the competitor names, so name it first
-    competitors = insights["competitor"].fillna("")
-    for name in sorted(competitors.unique(), key=lambda c: (c == "", c)):
-        group = insights[competitors == name]
+    cluster_ids = insights["cluster_id"].tolist()
+    links = query_df(
+        "SELECT cluster_id, source_id, url FROM items WHERE cluster_id IN"
+        f" ({','.join('?' * len(cluster_ids))})",
+        tuple(cluster_ids),
+    )
+    st.download_button(
+        "Download digest (Markdown)",
+        digest_markdown(insights, links, picked),
+        file_name=f"digest-{picked}.md",
+        mime="text/markdown",
+        icon=":material/download:",
+    )
+
+    for name, group in competitor_groups(insights):
         st.subheader(f"{display_name(name)} :gray[({len(group)})]")
         for _, insight in group.iterrows():
             render_insight(insight)
