@@ -5,3 +5,4 @@ __pycache__/
 .env
 data/ci.db
 data/ci.db-journal
+.serena/
