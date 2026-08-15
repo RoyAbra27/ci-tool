@@ -1,6 +1,6 @@
 {
  "version": 1,
- "labelled": "2026-08-14, drafted by Claude, pending Roy review before freeze",
+ "labelled": "2026-08-14, drafted by Claude; reviewed and approved by Roy 2026-08-15 (all 11 pipeline disagreements upheld). FROZEN.",
  "definitions": {
   "relevant": "y if the item tells a CI analyst something material about a tracked company's product, research, business, or strategy in JFrog's competitive space (artifact management, supply-chain security, DevOps platform, AI/dev tooling). Content-based only: recency is the filter's job, not a relevance judgment.",
   "category": "one of the fixed code taxonomy: product_release, security_research, funding, acquisition, partnership, pricing, leadership, marketing_content, other",

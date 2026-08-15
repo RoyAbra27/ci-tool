@@ -4,8 +4,9 @@ Deterministic, reproducible scoring of the pipeline against a hand-labelled
 sample. No LLM judges anything here; every metric is computed by
 `eval/run_eval.py` from frozen inputs.
 
-> Label status: drafted 2026-08-14, pending a second human review pass.
-> Numbers below regenerate with `python eval/run_eval.py` after any label edit.
+> Label status: drafted 2026-08-14, independently reviewed and frozen
+> 2026-08-15 (all 11 pipeline disagreements upheld on review). Numbers below
+> regenerate with `python eval/run_eval.py` after any label edit.
 
 ## Method
 
@@ -69,8 +70,10 @@ working as designed, on real data.
 
 - 40 items from one week of feed data; small enough that single labels move
   precision by 3 points.
-- One labeller, who also wrote the filter chain. A second reviewer pass is
-  planned before the labels are considered frozen.
+- The initial labels were drafted by one party close to the pipeline; a
+  second reviewer then examined every disagreement with the pipeline and
+  upheld all 11 before the freeze. Deeper mitigation (an independent
+  labeller for the full set) remains future work.
 - Dedup ground truth contains only exact-content mirrors; no cross-source
   paraphrase pairs occurred in the window, so SimHash clustering (as opposed
   to exact hashing) is untested by this sample.
