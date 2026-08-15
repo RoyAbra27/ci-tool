@@ -134,17 +134,22 @@ def view_daily_digest() -> None:
         st.caption("Operator: `uv run python -m ci_tool analyze` populates the digest.")
         return
 
-    left, right = st.columns([1, 3], vertical_alignment="bottom")
+    left, _ = st.columns([1, 3])
     with left:
         picked = st.selectbox("Digest date", dates["d"].tolist(), index=0)
     insights = demote_low_signal(
         query_df("SELECT * FROM insights WHERE date(created_at) = ?", (picked,))
     )
-    with right:
-        st.caption(f"{len(insights)} insights, every one quote-backed and source-linked")
     if insights.empty:
         st.info("No insights for this date.")
         return
+
+    events = int((~insights["category"].isin(LOW_SIGNAL_CATEGORIES)).sum())
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Insights", len(insights), border=True)
+    c2.metric("Product & security events", events, border=True)
+    c3.metric("Marketing & misc", len(insights) - events, border=True)
+    c4.metric("Competitors covered", insights["competitor"].dropna().nunique(), border=True)
 
     # insights with no competitor are industry news; pandas turns that NULL into
     # NaN, which is unsortable against the competitor names, so name it first
