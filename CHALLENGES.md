@@ -35,9 +35,10 @@ The cause was only found later, by checking stderr for the skip line.
 
 Lesson: silent-skip logic for optional config is right, but it means
 misconfiguration doesn't surface as an error - it surfaces as inexplicably
-empty output on a run that otherwise looks healthy. Worth validating that
-loaded keys are non-empty and non-comment-shaped at startup, not just
-inferring it from an empty result set.
+empty output on a run that otherwise looks healthy. The loader now warns
+on stderr at startup for exactly these shapes (commented-out line carrying
+a value, empty assignment, comment-shaped value) instead of leaving them
+to be inferred from an empty result set.
 
 ## The Snyk feed that never gets shorter
 
