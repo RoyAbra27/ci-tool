@@ -130,7 +130,8 @@ def view_daily_digest() -> None:
     st.header(":green[:material/today:] Daily digest")
     dates = query_df("SELECT DISTINCT date(created_at) AS d FROM insights ORDER BY d DESC")
     if dates.empty:
-        st.info("No insights yet. Run `uv run python -m ci_tool analyze` to populate the digest.")
+        st.info("No insights yet - the analysis stage hasn't produced anything for this database.")
+        st.caption("Operator: `uv run python -m ci_tool analyze` populates the digest.")
         return
 
     left, right = st.columns([1, 3], vertical_alignment="bottom")
@@ -325,10 +326,8 @@ def view_run_report() -> None:
 def main() -> None:
     if not DB_PATH.exists():
         st.title("CI Tool")
-        st.warning(
-            "No database found at data/ci.db. Run `uv run python -m ci_tool run` "
-            "from the repo root first."
-        )
+        st.warning("No data yet - the pipeline hasn't run on this machine.")
+        st.caption("Operator: `uv run python -m ci_tool run` from the repo root creates data/ci.db.")
         st.stop()
 
     page = st.navigation(
