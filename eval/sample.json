@@ -360,7 +360,7 @@
   "text": "A real Evo Continuous Offensive Security assessment uncovered 33 confirmed vulnerabilities in a multi-tenant enterprise SaaS, including tenant-wide compromise and critical authorization flaws.",
   "url": "https://snyk.io/blog/what-evo-cos-found-real-enterprise-saas",
   "published_at": "2026-08-10 00:00:00+00:00",
-  "pipeline_verdict": "irrelevant"
+  "pipeline_verdict": "passed"
  },
  {
   "id": "ac16d484c21c8b38c07e9c9bd27f3cfc6f3cd6a4655bd851646eceebfc875c20",
@@ -382,7 +382,7 @@
   "text": "AI model risk depends on how a model is deployed. Learn how Evo combines adversarial testing, attack impact, and deployment context to help teams compare models and enforce policy.",
   "url": "https://snyk.io/blog/why-we-rebuilt-evo-ai-model-risk-scoring",
   "published_at": "2026-08-04 04:00:00+00:00",
-  "pipeline_verdict": "irrelevant"
+  "pipeline_verdict": "passed"
  },
  {
   "id": "f5bab5f53d86a54514fdd97ba06f1b179022bb5a4f400546847366813af419b3",

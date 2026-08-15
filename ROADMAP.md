@@ -46,17 +46,17 @@ conflation shows up in practice.
 **Revisit when:** a source needs "trusted but unscoped" or "scoped but
 low-trust" - the first source that doesn't fit the current tier cleanly.
 
-## Product-name aliases for the tier-3 entity matcher
+## Full-text retrieval for tier-3 gating
 
-**Deferred.** The alias list in `config.toml` holds company names only, so a
-tier-3 post about a tracked competitor's *product* that never names the
-company slips past the gate. The eval measured this: 3 of 5 entity-matcher
-rejections were relevant Snyk posts that only say "Evo" (see EVALUATION.md).
-The fix is one alias line per competitor product; it is deliberately left
-unapplied so the published eval reflects the gate as measured.
+**Deferred.** The product-alias fix the eval motivated is applied (2026-08-15:
+`evo` added for Snyk; before/after in EVALUATION.md). The residual gate miss
+is a relevant Snyk research post whose full text names neither company nor
+product - no alias can catch it. The next rung is fetching article full text
+for tier-3 items before the entity gate, which costs a fetch per candidate
+and a paid news tier.
 
-**Revisit when:** the current eval numbers have served their purpose; apply
-together with a re-run of `eval/run_eval.py` and refreshed EVALUATION.md.
+**Revisit when:** measured misses justify the fetch cost; one residual miss
+in 40 items does not.
 
 ## Category-aware digest ranking
 
@@ -78,8 +78,8 @@ snippet-only. The channel is mechanically proven but not yet contributing
 digest items.
 
 **Revisit when:** the query terms are broadened per competitor product
-names (same fix as the alias item above) or a full-text news tier is
-justified; measure contribution per run before paying for either.
+names (e.g. "Evo", now that the entity gate tracks it) or a full-text news
+tier is justified; measure contribution per run before paying for either.
 
 ## Streamlit `st.logo` wordmark polish
 

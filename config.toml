@@ -46,7 +46,9 @@ aliases = ["gitlab"]
 id = "snyk"
 name = "Snyk"
 tier = 3
-aliases = ["snyk"]
+# "evo" is Snyk's product brand; the 2026-08-14 eval measured relevant Evo
+# posts slipping past a company-name-only gate (EVALUATION.md, gate misses)
+aliases = ["snyk", "evo"]
 
 [[competitors]]
 id = "harness"

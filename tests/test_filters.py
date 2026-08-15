@@ -51,6 +51,13 @@ class TestKeywordMatching:
         m = compile_keyword("cloudsmith")
         assert m("why cloudsmith raised money")
 
+    def test_evo_alias_matches_product_name_not_evolution(self):
+        # config.toml gates Snyk tier-3 items on "evo" (their product brand)
+        m = compile_keyword("evo")
+        assert m("what evo continuous offensive security found")
+        assert not m("the evolution of shai hulud worms")
+        assert not m("devops evolved")
+
     def test_matcher_drops_empty_strings(self):
         m = build_matcher(["", "  ", "sonatype"])
         assert not m("random unrelated text")
