@@ -64,8 +64,12 @@ name = "MLflow"
 tier = 3
 aliases = ["mlflow"]
 
+# label: analyst-facing display name, read only by the UI; the pipeline
+# ignores it.
+
 [[sources]]
 id = "sonatype-blog"
+label = "Sonatype blog"
 provider = "rss"
 url = "https://www.sonatype.com/blog/rss.xml"
 trust_tier = 1
@@ -73,6 +77,7 @@ competitor = "sonatype"
 
 [[sources]]
 id = "cloudsmith-blog"
+label = "Cloudsmith blog"
 provider = "rss"
 url = "https://cloudsmith.com/rss/blog.xml"
 trust_tier = 1
@@ -80,6 +85,7 @@ competitor = "cloudsmith"
 
 [[sources]]
 id = "jfrog-blog"
+label = "JFrog blog"
 provider = "rss"
 url = "https://jfrog.com/blog/feed/"
 trust_tier = 1
@@ -87,6 +93,7 @@ competitor = "jfrog"
 
 [[sources]]
 id = "github-changelog"
+label = "GitHub changelog"
 provider = "rss"
 url = "https://github.blog/changelog/feed/"
 trust_tier = 2
@@ -94,6 +101,7 @@ competitor = "github"
 
 [[sources]]
 id = "gitlab-releases"
+label = "GitLab releases"
 provider = "rss"
 url = "https://docs.gitlab.com/releases/all-releases.xml"
 trust_tier = 2
@@ -101,6 +109,7 @@ competitor = "gitlab"
 
 [[sources]]
 id = "snyk-blog"
+label = "Snyk blog"
 provider = "rss"
 url = "https://snyk.io/blog/feed/"
 trust_tier = 3
@@ -108,6 +117,7 @@ competitor = "snyk"
 
 [[sources]]
 id = "releases-nexus-public"
+label = "Nexus releases"
 provider = "github_releases"
 repo = "sonatype/nexus-public"
 trust_tier = 1
@@ -115,6 +125,7 @@ competitor = "sonatype"
 
 [[sources]]
 id = "releases-cloudsmith-cli"
+label = "Cloudsmith CLI releases"
 provider = "github_releases"
 repo = "cloudsmith-io/cloudsmith-cli"
 trust_tier = 1
@@ -122,6 +133,7 @@ competitor = "cloudsmith"
 
 [[sources]]
 id = "harness-blog"
+label = "Harness blog"
 provider = "rss"
 url = "https://www.harness.io/blog/rss.xml"
 trust_tier = 1
@@ -129,6 +141,7 @@ competitor = "harness"
 
 [[sources]]
 id = "releases-mlflow"
+label = "MLflow releases"
 provider = "github_releases"
 repo = "mlflow/mlflow"
 trust_tier = 1
@@ -136,6 +149,7 @@ competitor = "mlflow"
 
 [[sources]]
 id = "newsdata"
+label = "Industry news"
 provider = "newsdata"
 trust_tier = 3
 query = "JFrog OR Sonatype OR Cloudsmith OR Artifactory"

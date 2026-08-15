@@ -37,7 +37,7 @@ Four views, reading only from SQLite:
 1. **Daily digest** - the morning read: clustered insights per competitor, each with category, JFrog-theme tags, computed confidence, and the verbatim evidence quote.
 2. **Competitor timeline** - chronological events and a competitor-by-category count matrix (counts, deliberately no scores).
 3. **Item explorer** - every ingested item with full provenance: source, trust tier, content hash, raw cache file, and the insight it produced.
-4. **Run report** - per-filter drop counters for every run, plus the quarantine: LLM outputs that failed schema or grounding verification, kept out of the digest by design.
+4. **Run report** - per-filter drop counters for every run, plus the held-back list (the quarantine table): LLM outputs that failed schema or grounding verification, kept out of the digest by design.
 
 ## How it decides (short version)
 

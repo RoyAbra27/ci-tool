@@ -44,6 +44,23 @@ def display_name(competitor) -> str:
     return competitor_names().get(competitor, str(competitor).title())
 
 
+@st.cache_data(ttl=300)
+def source_labels() -> dict[str, str]:
+    try:
+        cfg = tomllib.loads((REPO_ROOT / "config.toml").read_text(encoding="utf-8"))
+        return {s["id"]: s.get("label", s["id"]) for s in cfg.get("sources", [])}
+    except (OSError, tomllib.TOMLDecodeError):
+        return {}
+
+
+def source_label(source_id: str) -> str:
+    return source_labels().get(source_id, source_id)
+
+
+def category_label(slug: str) -> str:
+    return slug.replace("_", " ").capitalize()
+
+
 def _connect() -> sqlite3.Connection:
     conn = sqlite3.connect(f"file:{DB_PATH.as_posix()}?mode=ro", uri=True)
     conn.row_factory = sqlite3.Row
@@ -83,7 +100,7 @@ def _json_dict(s: str) -> dict:
 
 def badge_line(category: str, themes: list, confidence: str) -> str:
     conf_color = CONFIDENCE_COLOR.get(confidence, "gray")
-    parts = [f":blue-badge[{category}]"]
+    parts = [f":blue-badge[{category_label(category)}]"]
     parts += [f":violet-badge[{t}]" for t in themes]
     parts.append(f":{conf_color}-badge[{confidence} confidence]")
     return " ".join(parts)
@@ -104,7 +121,8 @@ def render_insight(insight: pd.Series) -> None:
             )
             for _, item in items.iterrows():
                 st.caption(
-                    f"[{item['source_id']}]({item['url']}) - published {item['published_at'] or 'unknown'}"
+                    f"[{source_label(item['source_id'])}]({item['url']})"
+                    f" - published {item['published_at'] or 'unknown'}"
                 )
 
 
@@ -175,7 +193,7 @@ def view_competitor_timeline() -> None:
         for _, row in filtered.iterrows():
             date_str = row["published_at"].date().isoformat() if pd.notna(row["published_at"]) else "unknown"
             st.markdown(
-                f"**{date_str}** :blue-badge[{row['category']}] "
+                f"**{date_str}** :blue-badge[{category_label(row['category'])}] "
                 f"**{display_name(row['competitor'])}** - {row['summary']}"
             )
 
@@ -183,7 +201,7 @@ def view_competitor_timeline() -> None:
     st.caption("Counts of verifiable events only; deliberately no scores.")
     counts = filtered.pivot_table(
         index="competitor", columns="category", values="cluster_id", aggfunc="count", fill_value=0
-    )
+    ).rename(columns=category_label, index=display_name)
     if not counts.empty:
         st.bar_chart(counts)
     st.dataframe(counts)
@@ -198,9 +216,15 @@ def view_item_explorer() -> None:
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        source = st.selectbox("Source", ["All"] + sorted(items["source_id"].dropna().unique().tolist()))
+        source = st.selectbox(
+            "Source", ["All"] + sorted(items["source_id"].dropna().unique().tolist()),
+            format_func=lambda s: s if s == "All" else source_label(s),
+        )
     with col2:
-        competitor = st.selectbox("Competitor", ["All"] + sorted(items["competitor"].dropna().unique().tolist()))
+        competitor = st.selectbox(
+            "Competitor", ["All"] + sorted(items["competitor"].dropna().unique().tolist()),
+            format_func=lambda c: c if c == "All" else display_name(c),
+        )
     with col3:
         search = st.text_input("Search title")
 
@@ -270,7 +294,7 @@ def view_run_report() -> None:
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Items", items_count, border=True)
     c2.metric("Insights", insights_count, border=True)
-    c3.metric("Quarantined", quarantine_count, border=True)
+    c3.metric("Held back", quarantine_count, border=True)
     c4.metric("Last run (UTC)", last_run, border=True)
 
     st.subheader("Runs")
@@ -281,10 +305,11 @@ def view_run_report() -> None:
         table = pd.concat([runs[["run_id", "ts", "mode"]].reset_index(drop=True), counters], axis=1)
         st.dataframe(table, hide_index=True)
 
-    st.subheader("Quarantine")
+    st.subheader("Held back - failed verification")
     st.caption(
-        ":material/block: Items here failed schema or grounding verification "
-        "and were kept out of the digest. Fail closed, visibly."
+        ":material/block: These extractions could not be verified against their "
+        "source text, so they were kept out of the digest rather than published. "
+        "Nothing is dropped silently."
     )
     quarantine = query_df("SELECT * FROM quarantine ORDER BY ts DESC")
     if quarantine.empty:
@@ -315,7 +340,10 @@ def main() -> None:
         ]
     )
     st.sidebar.markdown("### :green[:material/radar:] CI Tool")
-    st.sidebar.caption("Read-only view over data/ci.db. Every insight is quote-backed; failures are quarantined, never hidden.")
+    st.sidebar.caption(
+        "Every insight is quote-backed and source-linked; anything that fails "
+        "verification is held back and shown in the run report, never hidden."
+    )
     page.run()
 
 
