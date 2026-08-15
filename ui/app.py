@@ -30,12 +30,15 @@ st.set_page_config(page_title="CI Tool", page_icon=":material/radar:", layout="w
 
 
 @st.cache_data(ttl=300)
-def competitor_names() -> dict[str, str]:
+def _config() -> dict:
     try:
-        cfg = tomllib.loads((REPO_ROOT / "config.toml").read_text(encoding="utf-8"))
-        return {c["id"]: c["name"] for c in cfg.get("competitors", [])}
+        return tomllib.loads((REPO_ROOT / "config.toml").read_text(encoding="utf-8"))
     except (OSError, tomllib.TOMLDecodeError):
         return {}
+
+
+def competitor_names() -> dict[str, str]:
+    return {c["id"]: c["name"] for c in _config().get("competitors", [])}
 
 
 def display_name(competitor) -> str:
@@ -44,13 +47,8 @@ def display_name(competitor) -> str:
     return competitor_names().get(competitor, str(competitor).title())
 
 
-@st.cache_data(ttl=300)
 def source_labels() -> dict[str, str]:
-    try:
-        cfg = tomllib.loads((REPO_ROOT / "config.toml").read_text(encoding="utf-8"))
-        return {s["id"]: s.get("label", s["id"]) for s in cfg.get("sources", [])}
-    except (OSError, tomllib.TOMLDecodeError):
-        return {}
+    return {s["id"]: s.get("label", s["id"]) for s in _config().get("sources", [])}
 
 
 def source_label(source_id: str) -> str:
@@ -107,7 +105,8 @@ def badge_line(category: str, themes: list, confidence: str) -> str:
 
 
 def competitor_groups(insights: pd.DataFrame):
-    """UI order: named competitors alphabetically, industry (no competitor) last."""
+    """UI order: named competitors alphabetically, industry (no competitor) last.
+    fillna first: pandas NaN is unsortable against the competitor name strings."""
     competitors = insights["competitor"].fillna("")
     for name in sorted(competitors.unique(), key=lambda c: (c == "", c)):
         yield name, insights[competitors == name]
