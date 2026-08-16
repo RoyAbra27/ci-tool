@@ -1,5 +1,5 @@
 """SQLite derived index. Files under data/raw are canonical; this DB is safe
-to delete and rebuilds from them. The events table is append-only provenance."""
+to delete and rebuilds from them."""
 
 import json
 import sqlite3
@@ -26,13 +26,6 @@ CREATE TABLE IF NOT EXISTS items(
 );
 CREATE INDEX IF NOT EXISTS idx_items_url ON items(url);
 CREATE INDEX IF NOT EXISTS idx_items_cluster ON items(cluster_id);
-CREATE TABLE IF NOT EXISTS events(
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  item_id TEXT NOT NULL,
-  event TEXT NOT NULL,
-  detail TEXT NOT NULL DEFAULT '',
-  ts TEXT NOT NULL
-);
 CREATE TABLE IF NOT EXISTS quarantine(
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   ref_id TEXT NOT NULL,
@@ -99,13 +92,6 @@ def _now() -> str:
     return datetime.now(UTC).isoformat()
 
 
-def add_event(conn: sqlite3.Connection, item_id: str, event: str, detail: str = "") -> None:
-    conn.execute(
-        "INSERT INTO events(item_id, event, detail, ts) VALUES(?,?,?,?)",
-        (item_id, event, detail, _now()),
-    )
-
-
 def insert_item(
     conn: sqlite3.Connection, item: RawItem, fingerprint: str, cluster_id: str, run_id: str
 ) -> None:
@@ -122,7 +108,6 @@ def insert_item(
             item.fetched_at.isoformat(), fingerprint, cluster_id, item.raw_ref, run_id,
         ),
     )
-    add_event(conn, item_id, "ingested", f"run={run_id} source={item.source_id}")
 
 
 def unanalyzed_clusters(conn: sqlite3.Connection) -> dict[str, list[sqlite3.Row]]:
