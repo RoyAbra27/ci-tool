@@ -51,6 +51,37 @@ def _as_utc(ts: datetime) -> datetime:
     return ts.replace(tzinfo=UTC) if ts.tzinfo is None else ts
 
 
+def classify_item(
+    item: RawItem,
+    *,
+    cutoff: datetime,
+    batch_ids: set[str],
+    seen_ids: set[str],
+    seen_urls: set[str],
+    matcher,
+) -> tuple[str, RawItem]:
+    """One item through every gate, cheapest first. Returns (verdict, item)
+    with the URL canonicalized; a pass mutates batch_ids. Shared by the live
+    chain and eval/build_sample.py, so the eval scores the production gate."""
+    url = canonicalize_url(item.url)
+    if not url or not item.title.strip():
+        return "invalid", item
+    item = item.model_copy(update={"url": url})
+    if _as_utc(item.published_at or item.fetched_at) < cutoff:
+        return "stale", item
+    content_id = item.content_hash()
+    if content_id in batch_ids:
+        return "dup_batch", item
+    if content_id in seen_ids or url in seen_urls:
+        return "dup_seen", item
+    # tier 1-2 feeds are on-topic by construction; only third-party news
+    # must name a tracked entity
+    if item.trust_tier >= 3 and not matcher(f"{item.title} {item.text}"):
+        return "irrelevant", item
+    batch_ids.add(content_id)
+    return "passed", item
+
+
 def run_chain(
     items: list[RawItem],
     *,
@@ -69,28 +100,12 @@ def run_chain(
     batch_ids: set[str] = set()
 
     for item in items:
-        url = canonicalize_url(item.url)
-        if not url or not item.title.strip():
-            counters["invalid"] += 1
-            continue
-        item = item.model_copy(update={"url": url})
-        if _as_utc(item.published_at or item.fetched_at) < cutoff:
-            counters["stale"] += 1
-            continue
-        content_id = item.content_hash()
-        if content_id in batch_ids:
-            counters["dup_batch"] += 1
-            continue
-        if content_id in seen_ids or url in seen_urls:
-            counters["dup_seen"] += 1
-            continue
-        # tier 1-2 feeds are on-topic by construction; only third-party news
-        # must name a tracked entity
-        if item.trust_tier >= 3 and not matcher(f"{item.title} {item.text}"):
-            counters["irrelevant"] += 1
-            continue
-        batch_ids.add(content_id)
-        passed.append(item)
-        counters["passed"] += 1
+        verdict, item = classify_item(
+            item, cutoff=cutoff, batch_ids=batch_ids,
+            seen_ids=seen_ids, seen_urls=seen_urls, matcher=matcher,
+        )
+        counters[verdict] += 1
+        if verdict == "passed":
+            passed.append(item)
 
     return passed, counters
