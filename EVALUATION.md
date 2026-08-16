@@ -82,6 +82,17 @@ mismatches to 3. The same Nexus cluster quarantined again under v2 for the
 same fabricated date, so the fail-closed path reproduces across prompt
 versions.
 
+**A v3 was attempted and reverted.** One added rule targeted the
+partnership regression ("one vendor adding a third-party model to its own
+product is product_release"). Measured on a full re-extraction: the
+targeted item still classified as `partnership`, accuracy stayed flat
+(28/31 judged), and quarantines tripled (1 to 3, two new paraphrased-quote
+grounding failures) - the longer calibration made extraction noisier
+without fixing its target. v3 was reverted; v2 is the shipped prompt. The
+remaining three mismatches are boundary judgments, and further prompt
+tuning against a 32-item labelled set would be fitting the test set, so
+prompt iteration stops here.
+
 ## Failure modes, honestly
 
 **Tier 1-2 sources pass unconditionally, so marketing passes too.** The 8
