@@ -80,20 +80,12 @@ def query_df(sql: str, params: tuple = ()) -> pd.DataFrame:
     return pd.DataFrame([dict(r) for r in rows], columns=cols)
 
 
-def _json_list(s: str) -> list:
+def _json_safe(s: str, default: list | dict):
     try:
-        v = json.loads(s) if s else []
+        v = json.loads(s) if s else default
     except (json.JSONDecodeError, TypeError):
-        return []
-    return v if isinstance(v, list) else []
-
-
-def _json_dict(s: str) -> dict:
-    try:
-        v = json.loads(s) if s else {}
-    except (json.JSONDecodeError, TypeError):
-        return {}
-    return v if isinstance(v, dict) else {}
+        return default
+    return v if isinstance(v, type(default)) else default
 
 
 def badge_line(category: str, themes: list, confidence: str) -> str:
@@ -129,7 +121,7 @@ def digest_markdown(insights: pd.DataFrame, links: pd.DataFrame, date_str: str) 
 
 
 def render_insight(insight: pd.Series) -> None:
-    themes = _json_list(insight["themes"])
+    themes = _json_safe(insight["themes"], [])
     with st.container(border=True):
         st.markdown(f"##### {insight['summary']}")
         st.markdown(badge_line(insight["category"], themes, insight["confidence"]))
@@ -339,7 +331,7 @@ def view_run_report() -> None:
     if runs.empty:
         st.info("No runs recorded yet.")
     else:
-        counters = pd.json_normalize(runs["counters"].apply(_json_dict).tolist())
+        counters = pd.json_normalize(runs["counters"].apply(lambda s: _json_safe(s, {})).tolist())
         table = pd.concat([runs[["run_id", "ts", "mode"]].reset_index(drop=True), counters], axis=1)
         st.dataframe(table, hide_index=True)
 
