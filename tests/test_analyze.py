@@ -32,7 +32,7 @@ def repo(tmp_path):
     (tmp_path / "config.toml").write_text(
         "sources = []\n"
         '[settings]\nraw_dir = "data/raw"\ndb_path = "data/ci.db"\n'
-        "[[competitors]]\nid = \"cloudsmith\"\nname = \"Cloudsmith\"\ntier = 1\n"
+        "[[competitors]]\nid = \"cloudsmith\"\nname = \"Cloudsmith\"\n"
         "aliases = [\"cloudsmith\"]\n",
         encoding="utf-8",
     )

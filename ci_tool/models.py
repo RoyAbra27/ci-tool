@@ -28,7 +28,6 @@ class SourceConfig(BaseModel):
 class CompetitorConfig(BaseModel):
     id: str
     name: str
-    tier: int
     aliases: list[str] = Field(default_factory=list)
 
 

@@ -22,37 +22,32 @@ db_path = "data/ci.db"
 [[competitors]]
 id = "jfrog"
 name = "JFrog"
-tier = 0 # ourselves; tracked so the digest shows our own announcements too
+# ourselves; tracked so the digest shows our own announcements too
 aliases = ["jfrog", "artifactory", "xray", "apptrust", "jfrog fly"]
 
 [[competitors]]
 id = "sonatype"
 name = "Sonatype"
-tier = 1
 aliases = ["sonatype", "nexus repository", "nexus lifecycle", "nexus firewall"]
 
 [[competitors]]
 id = "cloudsmith"
 name = "Cloudsmith"
-tier = 1
 aliases = ["cloudsmith"]
 
 [[competitors]]
 id = "github"
 name = "GitHub"
-tier = 2
 aliases = ["github packages", "github artifact", "github advanced security", "dependabot"]
 
 [[competitors]]
 id = "gitlab"
 name = "GitLab"
-tier = 2
 aliases = ["gitlab"]
 
 [[competitors]]
 id = "snyk"
 name = "Snyk"
-tier = 3
 # "evo" is Snyk's product brand; the 2026-08-14 eval measured relevant Evo
 # posts slipping past a company-name-only gate (EVALUATION.md, gate misses)
 aliases = ["snyk", "evo"]
@@ -60,7 +55,6 @@ aliases = ["snyk", "evo"]
 [[competitors]]
 id = "harness"
 name = "Harness"
-tier = 3
 # "harness" alone is a generic English word (test harness) and would poison
 # the tier-3 substring gate; precise aliases trade recall for precision
 aliases = ["harness.io", "harness platform", "harness cd", "harness ci"]
@@ -68,7 +62,6 @@ aliases = ["harness.io", "harness platform", "harness cd", "harness ci"]
 [[competitors]]
 id = "mlflow"
 name = "MLflow"
-tier = 3
 aliases = ["mlflow"]
 
 # label: analyst-facing display name, read only by the UI; the pipeline
