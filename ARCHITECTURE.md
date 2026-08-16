@@ -22,7 +22,7 @@ flowchart TD
         PROV --> CACHE[("Raw file cache\ndata/raw/&lt;source_id&gt;/*.json\ncanonical, live/replay seam")]
         CACHE --> FILT["Filter chain\ncanonicalize URL, recency, dedup, relevance"]
         FILT --> SIM["SimHash clustering\n64-bit, 0.92 threshold"]
-        SIM --> DB[("SQLite - derived\nitems / events / runs")]
+        SIM --> DB[("SQLite - derived\nitems / runs")]
     end
 
     subgraph D2["MODEL-ASSISTED"]
@@ -41,6 +41,42 @@ flowchart TD
         QUAR --> UI
     end
 ```
+
+## One item, end to end
+
+A Snyk blog post published yesterday: the `rss` provider fetches the feed and
+the payload lands append-only in `data/raw/snyk-blog/<url_hash>-<body_hash>.json`
+(replay mode reads this same file with zero network). The filter chain
+canonicalizes the URL, checks the 14-day recency window, dedups by content
+hash and canonical URL, and - because `snyk-blog` is trust tier 3 - requires a
+tracked alias ("snyk", "evo") in the title or snippet. `fingerprint.py`
+SimHashes the normalized text: within 5 of 64 bits of an existing cluster it
+joins that `cluster_id`, otherwise it starts its own. `run.py` persists the
+item. `analyze.py` then builds one prompt from the cluster (max 4 items, 4000
+chars each) and asks Groq for a strict `InsightExtraction`; `grounding.verify`
+requires the quote, entities, and numbers to appear verbatim in the cached
+source text - one failure triggers a single re-ask, a second failure sends
+the raw payload to quarantine instead of the digest. `confidence` starts at
+the source's trust tier and bumps one level when a second independent item
+corroborates the cluster. The digest shows the insight under Snyk with its
+category badge, evidence quote, and source link; the Markdown export carries
+the same row.
+
+## JFrog theme glossary
+
+The `themes` field tags insights with the JFrog focus areas they touch
+(fixed `Theme` taxonomy in `models.py`; also defined for the model in
+`prompts/extract.md`):
+
+| Theme | Meaning |
+|---|---|
+| `agentic_supply_chain` | AI agents operating on the software supply chain |
+| `fly` | JFrog Fly, the agentic repository |
+| `apptrust` | JFrog AppTrust release governance |
+| `agentic_remediation` | AI-driven vulnerability fixing |
+| `ai_catalog` | governed catalogs of AI models, agents, and MCP servers |
+| `mlops_models` | ML model management, registries, Hugging Face |
+| `github_partnership` | GitHub/Copilot integrations and ecosystem moves |
 
 ## Deterministic vs model-assisted responsibilities
 
@@ -140,7 +176,7 @@ pipeline, LLM stage, and UI run end to end with no `GROQ_API_KEY`,
 | `filters.py` | URL canonicalization, recency, dedup, and relevance gates, one counter per gate |
 | `fingerprint.py` | SimHash near-duplicate fingerprinting and similarity scoring |
 | `run.py` | Ingest entry point: fetch, filter, fingerprint, cluster, persist, per-source status |
-| `db.py` | SQLite schema and access (`items`, `events`, `quarantine`, `insights`, `runs`) |
+| `db.py` | SQLite schema and access (`items`, `quarantine`, `insights`, `runs`) |
 | `llm.py` | Groq/Gemini call functions, strict schema derivation, response caching |
 | `analyze.py` | LLM stage entry point: prompt build, one bounded re-ask, quarantine routing |
 | `grounding.py` | Verbatim-match verification of LLM output against source text, confidence scoring |

@@ -5,11 +5,10 @@ doing. Nothing here is missing by accident.
 
 ## Embeddings for near-dup / clustering
 
-**Deferred.** SimHash (64-bit, 3-token shingles, 0.92 similarity threshold
-- at most 5 of 64 bits differ, see `ci_tool/fingerprint.py`) is a
-zero-dependency, near-verbatim duplicate detector, and that's what the
-pipeline sees today: the same press release or blog post cross-posted
-across feeds, not paraphrased coverage of the same event.
+**Deferred.** SimHash (parameters in ARCHITECTURE.md) is a zero-dependency,
+near-verbatim duplicate detector, and that's what the pipeline sees today:
+the same press release or blog post cross-posted across feeds, not
+paraphrased coverage of the same event.
 
 **Revisit when:** cross-source paraphrase duplicates start showing up -
 two sources covering the same announcement in their own words, which
