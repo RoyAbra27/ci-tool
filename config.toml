@@ -1,6 +1,13 @@
 # Deterministic pipeline configuration. Adding a competitor or source is a
 # config change, not a code change.
 
+# Pinned model IDs, never "latest" (MODEL-GOVERNANCE.md). Values mirror the
+# LLMConfig defaults in ci_tool/models.py; provider swap is a one-line edit.
+[llm]
+provider = "groq"
+groq_model = "openai/gpt-oss-120b"
+gemini_model = "gemini-2.5-flash"
+
 [settings]
 recency_days = 14
 cluster_window_days = 90

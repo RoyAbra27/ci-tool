@@ -232,6 +232,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "feedparser" },
     { name = "httpx" },
+    { name = "pandas" },
     { name = "pydantic" },
     { name = "streamlit" },
 ]
@@ -245,6 +246,7 @@ dev = [
 requires-dist = [
     { name = "feedparser", specifier = ">=6.0" },
     { name = "httpx", specifier = ">=0.27" },
+    { name = "pandas", specifier = ">=2.0" },
     { name = "pydantic", specifier = ">=2.7" },
     { name = "streamlit", specifier = ">=1.57" },
 ]
