@@ -2,6 +2,8 @@
 
 A competitive intelligence pipeline for JFrog's CI team. Deterministic code decides what enters (source allowlist, recency, dedup, entity rules) and how items group; a schema-confined LLM only compresses what already passed, and every claim it makes is mechanically verified against the source text or quarantined. The result is a daily digest where every line has a verbatim quote, a source link, and a computed confidence.
 
+![Daily digest view: per-competitor insight cards with category badges, computed confidence, published dates, and an evidence quote behind every claim](docs/img/digest.png)
+
 ## Quickstart (no API keys needed)
 
 ```bash
