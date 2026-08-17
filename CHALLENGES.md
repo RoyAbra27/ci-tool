@@ -65,7 +65,7 @@ dropna=False)` turns SQL NULL into pandas NaN, and the sort key used `k or
 float sort key ended up compared against string competitor names, which
 raises.
 
-Fixed in `716f7f3`: name the NaN before sorting
+Fixed in `85894da`: name the NaN before sorting
 (`insights["competitor"].fillna("")`) instead of special-casing it inline
 during comparison.
 
