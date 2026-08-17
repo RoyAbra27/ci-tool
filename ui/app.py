@@ -122,17 +122,22 @@ def digest_markdown(insights: pd.DataFrame, links: pd.DataFrame, date_str: str) 
 
 def render_insight(insight: pd.Series) -> None:
     themes = _json_safe(insight["themes"], [])
+    items = query_df(
+        "SELECT source_id, url, published_at FROM items WHERE cluster_id = ?",
+        (insight["cluster_id"],),
+    )
+    dates = items["published_at"].dropna()
+    published = dates.min()[:10] if not dates.empty else None
     with st.container(border=True):
         st.markdown(f"##### {insight['summary']}")
-        st.markdown(badge_line(insight["category"], themes, insight["confidence"]))
+        badges = badge_line(insight["category"], themes, insight["confidence"])
+        st.markdown(badges + (f" :gray[{published}]" if published else ""))
         if themes:
             st.caption(":material/target: Touches JFrog focus: " + ", ".join(themes))
-        with st.expander("Evidence", icon=":material/format_quote:"):
+        # popover, not expander: this card renders inside the per-competitor
+        # expander in the digest, and expanders may not be nested
+        with st.popover("Evidence", icon=":material/format_quote:"):
             st.markdown(f"> {insight['quote']}")
-            items = query_df(
-                "SELECT source_id, url, published_at FROM items WHERE cluster_id = ?",
-                (insight["cluster_id"],),
-            )
             for _, item in items.iterrows():
                 st.caption(
                     f"[{source_label(item['source_id'])}]({item['url']})"
@@ -151,12 +156,17 @@ def view_daily_digest() -> None:
     left, _ = st.columns([1, 3])
     with left:
         picked = st.selectbox("Digest date", dates["d"].tolist(), index=0)
-    insights = demote_low_signal(
-        query_df("SELECT * FROM insights WHERE date(created_at) = ?", (picked,))
-    )
+    insights = query_df("SELECT * FROM insights WHERE date(created_at) = ?", (picked,))
     if insights.empty:
         st.info("No insights for this date.")
         return
+    cluster_dates = query_df(
+        "SELECT cluster_id, MIN(published_at) AS published_at FROM items GROUP BY cluster_id"
+    )
+    insights = insights.merge(cluster_dates, on="cluster_id", how="left")
+    insights = demote_low_signal(
+        insights.sort_values("published_at", ascending=False, na_position="last")
+    )
 
     events = int((~insights["category"].isin(LOW_SIGNAL_CATEGORIES)).sum())
     c1, c2, c3, c4 = st.columns(4)
@@ -179,14 +189,23 @@ def view_daily_digest() -> None:
         icon=":material/download:",
     )
 
+    names = [name for name, _ in competitor_groups(insights)]
+    picked_comp = st.pills(
+        "Competitor",
+        ["All"] + names,
+        default="All",
+        format_func=lambda n: "All" if n == "All" else display_name(n),
+    )
     for name, group in competitor_groups(insights):
-        st.subheader(f"{display_name(name)} :gray[({len(group)})]")
-        for _, insight in group.iterrows():
-            render_insight(insight)
+        if picked_comp not in (None, "All") and name != picked_comp:
+            continue
+        with st.expander(f"**{display_name(name)}** :gray[({len(group)})]", expanded=True):
+            for _, insight in group.iterrows():
+                render_insight(insight)
 
 
 def view_competitor_timeline() -> None:
-    st.header(":green[:material/timeline:] Competitor timeline")
+    st.header(":green[:material/timeline:] Competitor timeline & comparison")
     insights = query_df("SELECT * FROM insights")
     if insights.empty:
         st.info("No insights yet.")
@@ -265,22 +284,25 @@ def view_item_explorer() -> None:
         filtered = filtered[filtered["competitor"] == competitor]
     if search:
         filtered = filtered[filtered["title"].str.contains(search, case=False, na=False)]
+    filtered = filtered.sort_values("published_at", ascending=False)
 
-    st.dataframe(
+    event = st.dataframe(
         filtered[["published_at", "source_id", "trust_tier", "competitor", "title", "url"]],
         hide_index=True,
         column_config={
             "url": st.column_config.LinkColumn("url"),
             "published_at": st.column_config.DatetimeColumn("published", format="YYYY-MM-DD HH:mm"),
         },
+        on_select="rerun",
+        selection_mode="single-row",
     )
 
     if filtered.empty:
         return
 
-    options = (filtered["title"] + " (" + filtered["id"].str[:8] + ")").tolist()
-    picked_label = st.selectbox("Select item for detail", options)
-    item = filtered.iloc[options.index(picked_label)]
+    st.caption("Select a row for detail; the newest item is shown by default.")
+    rows = event.selection.rows
+    item = filtered.iloc[rows[0] if rows else 0]
 
     st.subheader(item["title"])
     st.markdown(f"[{item['url']}]({item['url']})")
@@ -362,7 +384,7 @@ def main() -> None:
     page = st.navigation(
         [
             st.Page(view_daily_digest, title="Daily digest", icon=":material/today:", default=True),
-            st.Page(view_competitor_timeline, title="Competitor timeline", icon=":material/timeline:"),
+            st.Page(view_competitor_timeline, title="Timeline & comparison", icon=":material/timeline:"),
             st.Page(view_item_explorer, title="Item explorer", icon=":material/search:"),
             st.Page(view_run_report, title="Run report", icon=":material/monitor_heart:"),
         ]

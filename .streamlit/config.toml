@@ -1,5 +1,9 @@
 # JFrog-flavored dark theme: near-black charcoal ground, JFrog green accent.
 
+[client]
+# hide the Deploy button and developer menu (rerun/clear cache) for demos
+toolbarMode = "minimal"
+
 [theme]
 base = "dark"
 primaryColor = "#40BE46"
