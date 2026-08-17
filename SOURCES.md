@@ -10,10 +10,10 @@
 | github-changelog | rss | GitHub | 2 | https://github.blog/changelog/feed/ |
 | gitlab-releases | rss | GitLab | 2 | https://docs.gitlab.com/releases/all-releases.xml |
 | snyk-blog | rss | Snyk | 3 | https://snyk.io/blog/feed/ |
-| releases-nexus-public | github_releases | Sonatype | 1 | sonatype/nexus-public |
-| releases-cloudsmith-cli | github_releases | Cloudsmith | 1 | cloudsmith-io/cloudsmith-cli |
+| releases-nexus-public | github_releases | Sonatype | 1 | [sonatype/nexus-public](https://github.com/sonatype/nexus-public/releases.atom) |
+| releases-cloudsmith-cli | github_releases | Cloudsmith | 1 | [cloudsmith-io/cloudsmith-cli](https://github.com/cloudsmith-io/cloudsmith-cli/releases.atom) |
 | harness-blog | rss | Harness | 1 | https://www.harness.io/blog/rss.xml |
-| releases-mlflow | github_releases | MLflow | 1 | mlflow/mlflow |
+| releases-mlflow | github_releases | MLflow | 1 | [mlflow/mlflow](https://github.com/mlflow/mlflow/releases.atom) |
 | newsdata | newsdata | (query: JFrog OR Sonatype OR Cloudsmith OR Artifactory) | 3 | newsdata.io API |
 
 Full definitions, competitor aliases, and per-source trust tiers live in
