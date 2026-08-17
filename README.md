@@ -5,13 +5,12 @@ A competitive intelligence pipeline for JFrog's CI team. Deterministic code deci
 ## Quickstart (no API keys needed)
 
 ```bash
-git clone <this repo>
-cd ci-tool
-uv sync
-uv run python -m ci_tool run        # ingest, replayed from the bundled raw cache
-uv run python -m ci_tool analyze    # LLM stage, replayed from cached responses
-uv run streamlit run ui/app.py      # web UI at http://localhost:8501
+git clone <this repo> && cd ci-tool
+uv run python -m ci_tool run && uv run python -m ci_tool analyze   # full pipeline, replayed from the bundled cache
+uv run streamlit run ui/app.py                                     # web UI at http://localhost:8501
 ```
+
+No install step: `uv run` syncs the environment automatically on first use.
 
 Replay mode is the default everywhere: the repo ships its raw inputs (`data/raw/`), so the full pipeline and UI run offline with zero keys. The SQLite file is derived and safe to delete; it rebuilds from the cache.
 
@@ -20,9 +19,10 @@ Replay mode is the default everywhere: the repo ships its raw inputs (`data/raw/
 Copy `.env.example` to `.env`, fill any keys you have, then add `--live`:
 
 ```bash
-uv run python -m ci_tool run --live      # fetch feeds, update the raw cache
-uv run python -m ci_tool analyze --live  # call the LLM for new clusters (GROQ_API_KEY)
+uv run python -m ci_tool run --live && uv run python -m ci_tool analyze --live
 ```
+
+`run --live` fetches feeds and updates the raw cache; `analyze --live` calls the LLM for new clusters (GROQ_API_KEY).
 
 "Daily" is any scheduler running those two commands, e.g. cron:
 
