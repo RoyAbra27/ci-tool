@@ -5,7 +5,7 @@ A competitive intelligence pipeline for JFrog's CI team. Deterministic code deci
 ## Quickstart (no API keys needed)
 
 ```bash
-git clone <this repo> && cd ci-tool
+git clone https://github.com/RoyAbra27/ci-tool.git && cd ci-tool
 uv run python -m ci_tool run && uv run python -m ci_tool analyze   # full pipeline, replayed from the bundled cache
 uv run streamlit run ui/app.py                                     # web UI at http://localhost:8501
 ```
@@ -45,7 +45,7 @@ Four views, reading only from SQLite:
 
 ![Pipeline: sources -> raw cache -> deterministic filters -> SimHash clustering -> LLM extraction (fixed schema) -> mechanical grounding checks -> SQLite -> UI; grounding failures go to quarantine + run report](docs/img/pipeline.png)
 
-Docs: ARCHITECTURE.md, ROADMAP.md, CHALLENGES.md, EVALUATION.md, MODEL-GOVERNANCE.md, SOURCES.md (see repo root).
+Docs: [ARCHITECTURE.md](ARCHITECTURE.md), [ROADMAP.md](ROADMAP.md), [CHALLENGES.md](CHALLENGES.md), [EVALUATION.md](EVALUATION.md), [MODEL-GOVERNANCE.md](MODEL-GOVERNANCE.md), [SOURCES.md](SOURCES.md).
 
 ## Tests
 
