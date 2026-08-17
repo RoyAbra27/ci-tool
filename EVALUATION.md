@@ -129,6 +129,14 @@ rejected it after one bounded re-ask and quarantined it instead of publishing
 a plausible-looking but unverifiable claim. This is the fail-closed path
 working as designed, on real data.
 
+**A second, different failure class (2026-08-17 live run).** A newly fetched
+Cloudsmith post passed the gate, but the model returned an empty extraction
+(blank summary and quote); schema validation rejected it twice and it was
+quarantined. The comparison tables above report quarantine counts at
+measurement time (1); the shipped cache now replays 2 - the invented date
+and the empty extraction - covering both failure shapes: fabrication and
+refusal-shaped emptiness.
+
 ## Limitations
 
 - 40 items from one week of feed data; small enough that single labels move
