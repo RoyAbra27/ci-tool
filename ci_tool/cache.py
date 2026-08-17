@@ -37,20 +37,22 @@ class RawCache:
             }, ensure_ascii=False), encoding="utf-8")
         return str(path.relative_to(self.root))
 
-    def latest(self, source_id: str, cache_url: str) -> tuple[str, str] | None:
-        """Newest cached (body, raw_ref) for this source URL, or None."""
+    def all(self, source_id: str, cache_url: str) -> list[tuple[str, str]]:
+        """Every cached (body, raw_ref) for this source URL, oldest first."""
         prefix = _url_key(cache_url)
         candidates = sorted(
             (self.root / source_id).glob(f"{prefix}-*.json"),
             key=lambda p: json.loads(p.read_text(encoding="utf-8"))["fetched_at"],
         ) if (self.root / source_id).exists() else []
-        if not candidates:
-            return None
-        newest = candidates[-1]
-        return (
-            json.loads(newest.read_text(encoding="utf-8"))["body"],
-            str(newest.relative_to(self.root)),
-        )
+        return [
+            (json.loads(p.read_text(encoding="utf-8"))["body"], str(p.relative_to(self.root)))
+            for p in candidates
+        ]
+
+    def latest(self, source_id: str, cache_url: str) -> tuple[str, str] | None:
+        """Newest cached (body, raw_ref) for this source URL, or None."""
+        snapshots = self.all(source_id, cache_url)
+        return snapshots[-1] if snapshots else None
 
 
 class Fetcher:
@@ -64,12 +66,14 @@ class Fetcher:
         self.cache = cache
         self.live = live
 
-    def get_text(self, source_id: str, cache_url: str, *, params: dict | None = None) -> tuple[str, str]:
+    def get_texts(self, source_id: str, cache_url: str, *, params: dict | None = None) -> list[tuple[str, str]]:
+        """Live: one fresh (body, raw_ref). Replay: every cached snapshot,
+        oldest first - rolling feeds drop entries between fetches, so only the
+        union of snapshots reproduces everything the cache ever captured."""
         if self.live:
             body = http.get_text(cache_url, params=params)
-            raw_ref = self.cache.put(source_id, cache_url, body)
-            return body, raw_ref
-        cached = self.cache.latest(source_id, cache_url)
-        if cached is None:
+            return [(body, self.cache.put(source_id, cache_url, body))]
+        snapshots = self.cache.all(source_id, cache_url)
+        if not snapshots:
             raise SourceUnavailable(f"no cached payload for {source_id}: {cache_url}")
-        return cached
+        return snapshots

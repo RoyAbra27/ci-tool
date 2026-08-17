@@ -48,9 +48,9 @@ class FakeFetcher:
         self.live = live
         self.calls = 0
 
-    def get_text(self, source_id, cache_url, *, params=None):
+    def get_texts(self, source_id, cache_url, *, params=None):
         self.calls += 1
-        return self.body, self.ref
+        return [(self.body, self.ref)]
 
 
 def test_rss_parses_strips_html_and_skips_missing_link():

@@ -5,6 +5,28 @@ import pytest
 from ci_tool.cache import Fetcher, RawCache, SourceUnavailable
 
 
+def _age_snapshot(tmp_path, ref):
+    path = tmp_path / ref
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["fetched_at"] = "2000-01-01T00:00:00+00:00"
+    path.write_text(json.dumps(data), encoding="utf-8")
+
+
+def test_all_returns_every_snapshot_oldest_first(tmp_path):
+    cache = RawCache(tmp_path)
+    _age_snapshot(tmp_path, cache.put("src", "https://example.com/feed", "old body"))
+    cache.put("src", "https://example.com/feed", "new body")
+    assert [b for b, _ in cache.all("src", "https://example.com/feed")] == ["old body", "new body"]
+
+
+def test_replay_get_texts_returns_all_snapshots(tmp_path):
+    cache = RawCache(tmp_path)
+    _age_snapshot(tmp_path, cache.put("src", "https://example.com/feed", "old body"))
+    cache.put("src", "https://example.com/feed", "new body")
+    fetcher = Fetcher(cache, live=False)
+    assert [b for b, _ in fetcher.get_texts("src", "https://example.com/feed")] == ["old body", "new body"]
+
+
 def test_put_then_latest_roundtrip(tmp_path):
     cache = RawCache(tmp_path)
     ref = cache.put("src", "https://example.com/feed", "<rss>v1</rss>")
@@ -46,8 +68,8 @@ def test_replay_fetcher_reads_cache_and_fails_closed(tmp_path):
     cache = RawCache(tmp_path)
     cache.put("src", "https://example.com/feed", "cached")
     fetcher = Fetcher(cache, live=False)
-    body, ref = fetcher.get_text("src", "https://example.com/feed")
+    [(body, ref)] = fetcher.get_texts("src", "https://example.com/feed")
     assert body == "cached"
     assert ref
     with pytest.raises(SourceUnavailable):
-        fetcher.get_text("src", "https://example.com/other")
+        fetcher.get_texts("src", "https://example.com/other")

@@ -9,8 +9,8 @@ def fetch(source: SourceConfig, fetcher: Fetcher) -> list[RawItem]:
     if not source.repo:
         raise ValueError(f"github_releases source {source.id!r} has no repo")
     cache_url = f"https://github.com/{source.repo}/releases.atom"
-    body, raw_ref = fetcher.get_text(source.id, cache_url)
     return [
         item.model_copy(update={"title": f"{source.repo}: {item.title}"})
+        for body, raw_ref in fetcher.get_texts(source.id, cache_url)
         for item in parse_feed(body, source, raw_ref)
     ]

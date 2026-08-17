@@ -71,6 +71,13 @@ class TestRunChain:
         base.update(overrides)
         return base
 
+    def test_same_url_different_content_dedups_to_oldest_snapshot(self):
+        v1 = make_item(text="original body")
+        v2 = make_item(text="the feed edited this entry later")
+        passed, counters = run_chain([v1, v2], **self.kwargs())
+        assert [p.text for p in passed] == ["original body"]
+        assert counters["dup_batch"] == 1
+
     def test_happy_path_passes(self):
         passed, counters = run_chain([make_item()], **self.kwargs())
         assert len(passed) == 1
@@ -110,8 +117,10 @@ class TestRunChain:
 
     def test_relevance_gates_tier3_only(self):
         offtopic_t1 = make_item(title="Team offsite recap", text="fun times")
-        offtopic_t3 = make_item(trust_tier=3, title="Generic tech news", text="nothing tracked here")
-        ontopic_t3 = make_item(trust_tier=3, title="Cloudsmith raises Series C", text="")
+        offtopic_t3 = make_item(url="https://example.com/t3-offtopic", trust_tier=3,
+                                title="Generic tech news", text="nothing tracked here")
+        ontopic_t3 = make_item(url="https://example.com/t3-ontopic", trust_tier=3,
+                               title="Cloudsmith raises Series C", text="")
         passed, counters = run_chain([offtopic_t1, offtopic_t3, ontopic_t3], **self.kwargs())
         assert {i.title for i in passed} == {"Team offsite recap", "Cloudsmith raises Series C"}
         assert counters["irrelevant"] == 1

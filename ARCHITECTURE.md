@@ -162,6 +162,12 @@ Both stages take a `--live` flag; without it, `run` replays from `data/raw/` and
 pipeline, LLM stage, and UI run end to end with no `GROQ_API_KEY`,
 `GEMINI_API_KEY`, or `NEWSDATA_API_KEY` set.
 
+Replay is also clock-independent: the recency window anchors to
+`replay_anchor` in config.toml (the instant the eval sample froze) instead
+of the wall clock, so a rebuilt database is a pure function of the repo -
+delete `data/ci.db` on any date and replay reproduces the same rows.
+Live mode keeps the wall clock, as a daily tool should.
+
 ## Components
 
 | Module | Responsibility |

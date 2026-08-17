@@ -11,6 +11,9 @@ gemini_model = "gemini-2.5-flash"
 [settings]
 recency_days = 14
 cluster_window_days = 90
+# replay recency window anchors here (the eval sample's frozen NOW), so a
+# rebuilt db reproduces the documented state on any date; live uses the clock
+replay_anchor = "2026-08-14T10:20:35Z"
 raw_dir = "data/raw"
 db_path = "data/ci.db"
 

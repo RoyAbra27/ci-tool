@@ -9,12 +9,21 @@ from ci_tool.cache import Fetcher, RawCache, SourceUnavailable
 from ci_tool.models import load_config
 
 
+def _filter_now(*, live: bool, wall: datetime, anchor: datetime | None) -> datetime:
+    """Replay must be a pure function of the cache: the recency window anchors
+    to capture time (config replay_anchor), not the wall clock, or cached items
+    age out and a rebuilt db drifts from the documented one. Live tracks the
+    clock as a daily tool should."""
+    return anchor if not live and anchor else wall
+
+
 def run(*, live: bool, config_path: str = "config.toml") -> dict:
     cfg = load_config(config_path)
     root = Path(config_path).resolve().parent
     fetcher = Fetcher(RawCache(root / cfg.settings.raw_dir), live)
-    now = datetime.now(UTC)
-    run_id = now.strftime("%Y%m%dT%H%M%SZ")
+    wall = datetime.now(UTC)
+    run_id = wall.strftime("%Y%m%dT%H%M%SZ")
+    now = _filter_now(live=live, wall=wall, anchor=cfg.settings.replay_anchor)
 
     items = []
     source_status: dict[str, str] = {}

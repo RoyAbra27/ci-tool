@@ -98,14 +98,21 @@ def run_chain(
     cutoff = now - timedelta(days=recency_days)
     passed: list[RawItem] = []
     batch_ids: set[str] = set()
+    batch_urls: set[str] = set()
 
     for item in items:
         verdict, item = classify_item(
             item, cutoff=cutoff, batch_ids=batch_ids,
             seen_ids=seen_ids, seen_urls=seen_urls, matcher=matcher,
         )
+        # replay feeds the union of feed snapshots; when a feed edited an
+        # entry in place, the oldest variant of a URL wins (what a daily
+        # live run would have stored first)
+        if verdict == "passed" and item.url in batch_urls:
+            verdict = "dup_batch"
         counters[verdict] += 1
         if verdict == "passed":
+            batch_urls.add(item.url)
             passed.append(item)
 
     return passed, counters

@@ -25,6 +25,10 @@ sample. No LLM judges anything here; every metric is computed by
   with the pipeline verdict visible, by the same person who built the
   pipeline - a bias worth naming.
 - Reproduce: `python eval/run_eval.py` (replay mode, no API keys needed).
+  Reproducibility is clock-independent: the sample generator pins its NOW
+  and the pipeline's replay recency window anchors to the same instant
+  (`replay_anchor` in config.toml), so a database rebuilt from the cache on
+  any date yields these numbers exactly.
   The sample's *composition* is frozen from the 2026-08-14 cache; the live
   feeds have since rolled, so `build_sample.py` against today's cache yields
   a different item set. When the gate changed on 2026-08-15 the frozen

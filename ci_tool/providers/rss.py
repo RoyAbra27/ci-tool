@@ -69,5 +69,8 @@ def parse_feed(body: str, source: SourceConfig, raw_ref: str) -> list[RawItem]:
 def fetch(source: SourceConfig, fetcher: Fetcher) -> list[RawItem]:
     if source.url is None:
         raise ValueError(f"rss source {source.id!r} has no url")
-    body, raw_ref = fetcher.get_text(source.id, source.url)
-    return parse_feed(body, source, raw_ref)
+    return [
+        item
+        for body, raw_ref in fetcher.get_texts(source.id, source.url)
+        for item in parse_feed(body, source, raw_ref)
+    ]

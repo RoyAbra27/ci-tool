@@ -36,6 +36,7 @@ class Settings(BaseModel):
     cluster_window_days: int = 90
     raw_dir: str = "data/raw"
     db_path: str = "data/ci.db"
+    replay_anchor: datetime | None = None
 
 
 class LLMConfig(BaseModel):

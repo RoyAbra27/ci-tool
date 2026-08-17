@@ -34,27 +34,26 @@ def fetch(source: SourceConfig, fetcher: Fetcher) -> list[RawItem]:
     # q already lives in cache_url; httpx merges params with the URL query,
     # so repeating it here would send q twice
     params = {"apikey": os.environ.get("NEWSDATA_API_KEY", "")}
-    body, raw_ref = fetcher.get_text(source.id, cache_url, params=params)
     fetched_at = datetime.now(UTC)
 
-    results = json.loads(body).get("results", [])
     items = []
-    for entry in results:
-        if not isinstance(entry, dict):
-            continue
-        url = entry.get("link")
-        title = entry.get("title")
-        if not url or not title:
-            continue
-        items.append(RawItem(
-            source_id=source.id,
-            trust_tier=source.trust_tier,
-            competitor=source.competitor,
-            url=url,
-            title=title,
-            text=entry.get("description") or "",
-            published_at=_parse_pubdate(entry.get("pubDate")),
-            fetched_at=fetched_at,
-            raw_ref=raw_ref,
-        ))
+    for body, raw_ref in fetcher.get_texts(source.id, cache_url, params=params):
+        for entry in json.loads(body).get("results", []):
+            if not isinstance(entry, dict):
+                continue
+            url = entry.get("link")
+            title = entry.get("title")
+            if not url or not title:
+                continue
+            items.append(RawItem(
+                source_id=source.id,
+                trust_tier=source.trust_tier,
+                competitor=source.competitor,
+                url=url,
+                title=title,
+                text=entry.get("description") or "",
+                published_at=_parse_pubdate(entry.get("pubDate")),
+                fetched_at=fetched_at,
+                raw_ref=raw_ref,
+            ))
     return items
