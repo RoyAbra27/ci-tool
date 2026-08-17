@@ -30,6 +30,8 @@ uv run python -m ci_tool analyze --live  # call the LLM for new clusters (GROQ_A
 0 7 * * *  cd /path/to/ci-tool && uv run python -m ci_tool run --live && uv run python -m ci_tool analyze --live
 ```
 
+![The daily loop: a scheduler runs run --live then analyze --live, producing the daily digest; without --live the same pipeline replays offline from the committed raw cache](docs/img/daily-loop.png)
+
 ## The web UI
 
 Four views, reading only from SQLite:
@@ -41,11 +43,7 @@ Four views, reading only from SQLite:
 
 ## How it decides (short version)
 
-```
-feeds/APIs -> raw cache (files, canonical) -> deterministic filters -> SimHash clustering
-          -> LLM extraction (fixed schema) -> mechanical grounding checks -> SQLite -> UI
-                                                   |__ fail twice -> quarantine + run report
-```
+![Pipeline: sources -> raw cache -> deterministic filters -> SimHash clustering -> LLM extraction (fixed schema) -> mechanical grounding checks -> SQLite -> UI; grounding failures go to quarantine + run report](docs/img/pipeline.png)
 
 Docs: ARCHITECTURE.md, ROADMAP.md, CHALLENGES.md, EVALUATION.md, MODEL-GOVERNANCE.md, SOURCES.md (see repo root).
 
