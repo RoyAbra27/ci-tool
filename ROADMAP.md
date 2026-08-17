@@ -3,6 +3,66 @@
 Deferred work, tagged with why it's deferred and when it becomes worth
 doing. Nothing here is missing by accident.
 
+## Daily "what changed" delta view
+
+**Next up.** The digest is already daily; the next step is making the
+change explicit: an analyst opens the tool and sees only what is new since
+yesterday - new insights, new quarantines, sources that went quiet. All
+inputs exist (insights and runs are timestamped per run), so this is a
+diff over two days of already-verified rows, no new model calls.
+
+**Revisit when:** immediately - this is the first post-review feature.
+
+## Category-aware digest ranking and release roll-up
+
+**Deferred.** The digest already sinks marketing content below product and
+security events, but within a band every verified event gets equal billing.
+Observed cost (2026-08-17): three consecutive cloudsmith-cli patch releases
+(v1.21-v1.23) each took a full digest card. The next rung is a deterministic
+roll-up - consecutive releases of the same repo collapse into one line with
+the latest release on top - plus per-category weights in the sort.
+
+**Revisit when:** a digest day carries more than a handful of same-repo
+release items; the roll-up rule is a pure function over rows the digest
+already has.
+
+## Usage measurement
+
+**Deferred.** Two counters per week: digest items marked reviewed or
+flagged, and corrections submitted. Corrections double as new eval labels,
+so usage directly grows the labelled set. If review counts hit zero the
+tool is dead and the run report should say so.
+
+**Revisit when:** the tool has a second regular user - measurement of one
+person's own usage proves nothing.
+
+## Grounded Q&A over the verified archive ("ask the archive")
+
+**Deferred.** A chat interface over insights the pipeline has already
+verified - "what has Sonatype shipped on SBOM this year?" - under the same
+rules as the digest: the model may only compose answers from retrieved
+insight rows, every claim keeps its verbatim quote and link, and a question
+the archive cannot support gets "not in the archive", not an improvisation.
+Retrieval starts deterministic (SQL over category, competitor, theme,
+date - the corpus is hundreds of rows, not millions); embeddings enter only
+under the promotion condition below.
+
+**Revisit when:** the archive spans months and analysts ask historical
+questions (QBR prep is the concrete trigger). Until then the timeline view
+answers the same questions by eye.
+
+## MCP server over the corpus
+
+**Deferred.** Expose the verified corpus (insights, items, provenance,
+quarantine) as MCP tools, so assistants and internal agents query verified,
+quote-backed competitor facts instead of the raw web. The schema already
+carries what a consuming agent needs to stay honest: quote, source URL,
+computed confidence, prompt version. This is the integration shape JFrog
+itself ships for its platform, applied to the CI corpus.
+
+**Revisit when:** anything other than the Streamlit UI wants programmatic
+access - a second consumer is the trigger.
+
 ## Embeddings for near-dup / clustering
 
 **Deferred.** SimHash (parameters in ARCHITECTURE.md) is a zero-dependency,
