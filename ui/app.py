@@ -26,6 +26,12 @@ def demote_low_signal(insights: pd.DataFrame) -> pd.DataFrame:
         "category", key=lambda s: s.isin(LOW_SIGNAL_CATEGORIES), kind="stable"
     )
 
+def filter_by_title(items: pd.DataFrame, search: str) -> pd.DataFrame:
+    """regex=False is load-bearing: user input like "C++" or "(" is a search
+    term, not a pattern, and pandas' regex default raises on it."""
+    return items[items["title"].str.contains(search, case=False, na=False, regex=False)]
+
+
 st.set_page_config(page_title="CI Tool", page_icon=":material/radar:", layout="wide")
 
 
@@ -283,7 +289,7 @@ def view_item_explorer() -> None:
     if competitor != "All":
         filtered = filtered[filtered["competitor"] == competitor]
     if search:
-        filtered = filtered[filtered["title"].str.contains(search, case=False, na=False)]
+        filtered = filter_by_title(filtered, search)
     filtered = filtered.sort_values("published_at", ascending=False)
 
     event = st.dataframe(
